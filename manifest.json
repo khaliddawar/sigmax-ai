@@ -1,0 +1,93 @@
+{
+  "manifest_version": 3,
+  "name": "SigMax AI",
+  "version": "1.0.0",
+  "description": "Capture trading signals and chat discussions from various platforms and stream structured data to backend webhooks for AI analysis",
+  "author": "Khalid Dawar",
+  
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting",
+    "alarms",
+    "sidePanel",
+    "contextMenus",
+    "notifications"
+  ],
+  
+  "host_permissions": [
+    "https://discord.com/*",
+    "https://web.telegram.org/*",
+    "https://*.slack.com/*",
+    "https://web.whatsapp.com/*",
+    "https://app.circle.so/*",
+    "https://*.circle.so/*",
+    "https://members.julian-komar.com/*",
+    "https://*.julian-komar.com/*",
+    "<all_urls>"
+  ],
+  
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": [
+        "https://discord.com/*",
+        "https://web.telegram.org/*",
+        "https://*.slack.com/*",
+        "https://web.whatsapp.com/*",
+        "https://app.circle.so/*",
+        "https://*.circle.so/*",
+        "https://members.julian-komar.com/*",
+        "https://*.julian-komar.com/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "file:///*"
+      ],
+      "js": ["content/content-script.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "48": "assets/icons/icon-48.png",
+      "128": "assets/icons/icon-128.png"
+    },
+    "default_title": "SignalScope - Click to open sidebar"
+  },
+  
+  "side_panel": {
+    "default_path": "sidebar/sidebar.html"
+  },
+  
+  "options_page": "options/options.html",
+  
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  },
+  
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/styles/*.css",
+        "assets/templates/*.html"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'"
+  },
+  
+  "minimum_chrome_version": "88"
+}

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignalScope Sidebar</title>
+  <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+  <div class="sidebar-container">
+    <!-- Header Section -->
+    <header class="sidebar-header">
+      <div class="header-top">
+        <h1>SignalScope</h1>
+        <div class="connection-status">
+          <span class="status-indicator" id="statusIndicator"></span>
+          <span class="status-text" id="statusText">Connected</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Stats Dashboard -->
+    <section class="stats-panel">
+      <div class="stat-card">
+        <span class="stat-value" id="messageCount">0</span>
+        <span class="stat-label">Captured</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="queueSize">0</span>
+        <span class="stat-label">Queued</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="sentCount">0</span>
+        <span class="stat-label">Sent</span>
+      </div>
+    </section>
+
+    <!-- Message Preview Panel -->
+    <section class="preview-panel">
+      <div class="preview-header">
+        <h2>Live Message Preview</h2>
+        <div class="preview-controls">
+          <button id="togglePreview" class="toggle-btn" title="Pause/Resume Preview">
+            <span class="btn-icon">⏸️</span>
+          </button>
+          <button id="clearPreview" class="clear-btn" title="Clear Messages">
+            <span class="btn-icon">🗑️</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="preview-filters">
+        <select id="platformFilter" class="filter-select">
+          <option value="all">All Platforms</option>
+          <option value="circle">Circle</option>
+          <option value="discord">Discord</option>
+          <option value="telegram">Telegram</option>
+          <option value="slack">Slack</option>
+          <option value="whatsapp">WhatsApp</option>
+        </select>
+        <div class="search-container">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchFilter" class="search-input" placeholder="Search messages...">
+        </div>
+      </div>
+
+      <div class="message-stats">
+        <span id="filteredCount">0</span> messages shown
+        <span class="stats-separator">•</span>
+        <span id="totalMessages">0</span> total
+      </div>
+
+      <div id="messageList" class="message-list">
+        <!-- Messages will be inserted here dynamically -->
+        <div class="empty-state" id="emptyState">
+          <span class="empty-icon">💬</span>
+          <p>No messages captured yet</p>
+          <span>Messages will appear here in real-time</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls -->
+    <section class="controls-panel">
+      <button id="pauseCapture" class="btn btn-primary">
+        <span class="btn-icon">⏸️</span>
+        <span>Pause Capture</span>
+      </button>
+      <button id="openSettings" class="btn btn-secondary" title="Settings">
+        <span class="btn-icon">⚙️</span>
+      </button>
+      <button id="exportMessages" class="btn btn-secondary" title="Export Messages">
+        <span class="btn-icon">📥</span>
+      </button>
+    </section>
+  </div>
+
+
+</body>
+</html>
