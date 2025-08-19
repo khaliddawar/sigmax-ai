@@ -173,7 +173,7 @@ class WebhookManager {
           timestamp: msg.timestamp,
           url: msg.url,
           intelligence: msg.intelligence,
-          attachments: msg.attachments,
+          attachments: msg.attachments || [],  // Ensure attachments is always an array
           capturedAt: msg.capturedAt || msg.timestamp
         };
       });

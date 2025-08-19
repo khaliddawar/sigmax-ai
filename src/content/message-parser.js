@@ -559,7 +559,7 @@ class MessageParser {
       });
     });
     
-    return attachments.length > 0 ? attachments : null;
+    return attachments.length > 0 ? attachments : [];
   }
 
   extractReactions(element) {
@@ -580,7 +580,7 @@ class MessageParser {
       }
     });
     
-    return reactions.length > 0 ? reactions : null;
+    return reactions.length > 0 ? reactions : [];
   }
 
   extractSlackReactions(element) {
@@ -599,7 +599,7 @@ class MessageParser {
       }
     });
     
-    return reactions.length > 0 ? reactions : null;
+    return reactions.length > 0 ? reactions : [];
   }
 
   extractCircleAttachments(element) {
@@ -684,7 +684,7 @@ class MessageParser {
       }
     });
     
-    return attachments.length > 0 ? attachments : null;
+    return attachments.length > 0 ? attachments : [];
   }
 
   extractCircleReactions(element) {
@@ -708,7 +708,7 @@ class MessageParser {
       }
     });
     
-    return reactions.length > 0 ? reactions : null;
+    return reactions.length > 0 ? reactions : [];
   }
 
   generateImageContext(messageText, imageType) {
