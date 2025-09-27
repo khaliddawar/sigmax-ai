@@ -151,7 +151,16 @@ class ServiceWorker {
       case 'INJECT_CONTENT_SCRIPT':
         // Programmatically inject content script
         return await this.handleInjectContentScript(data, sender);
-        
+
+      case MESSAGE_TYPES.CAPTURE_STARTED:
+        return await this.handleCaptureStarted(data, sender);
+
+      case MESSAGE_TYPES.CAPTURE_STOPPED:
+        return await this.handleCaptureStopped(data, sender);
+
+      case MESSAGE_TYPES.GET_SETTINGS:
+        return await this.handleGetSettings();
+
       default:
         throw new Error(`Unknown message type: ${type}`);
     }
@@ -160,28 +169,33 @@ class ServiceWorker {
   async handleCaptureMessage(data, sender) {
     try {
       const settings = await this.storageManager.get(STORAGE_KEYS.ENABLED);
-      
+
       if (!settings[STORAGE_KEYS.ENABLED]) {
         logger.debug('Extension disabled, ignoring message');
         return { captured: false, reason: 'Extension disabled' };
       }
-      
-      // Add metadata
+
+      // Parse timestamp for ordering
+      const messageTimestamp = this.parseMessageTimestamp(data.timestamp);
+
+      // Add metadata with enhanced timestamp handling
       const message = {
         ...data,
         tabId: sender.tab?.id,
         url: sender.tab?.url,
-        capturedAt: new Date().toISOString()
+        capturedAt: new Date().toISOString(),
+        parsedTimestamp: messageTimestamp,
+        sequenceId: this.generateSequenceId(messageTimestamp, data.id)
       };
-      
+
       // Add to preview buffer for sidebar
       this.messageHandler.addToPreviewBuffer(message);
-      
-      // Queue message for webhook delivery
-      await this.webhookManager.queueMessage(message);
-      
-      logger.info('Message captured and queued:', message.id);
-      return { captured: true, messageId: message.id };
+
+      // Queue message for webhook delivery with timestamp-based ordering
+      await this.webhookManager.queueMessage(message, { preserveOrder: true });
+
+      logger.info('Message captured and queued:', message.id, 'at', messageTimestamp);
+      return { captured: true, messageId: message.id, sequenceId: message.sequenceId };
     } catch (error) {
       logger.error('Failed to capture message:', error);
       throw error;
@@ -628,9 +642,82 @@ class ServiceWorker {
     }
   }
 
+  async handleCaptureStarted(data, sender) {
+    try {
+      logger.info('Capture started on tab:', sender.tab?.id, 'Platform:', data.platform, 'Mode:', data.mode);
+
+      // Update badge to show active
+      await this.updateBadge(sender.tab?.id, true);
+
+      return { acknowledged: true, status: 'capture_started' };
+    } catch (error) {
+      logger.error('Failed to handle capture started:', error);
+      throw error;
+    }
+  }
+
+  async handleCaptureStopped(data, sender) {
+    try {
+      logger.info('Capture stopped on tab:', sender.tab?.id);
+
+      // Update badge to show inactive
+      await this.updateBadge(sender.tab?.id, false);
+
+      return { acknowledged: true, status: 'capture_stopped' };
+    } catch (error) {
+      logger.error('Failed to handle capture stopped:', error);
+      throw error;
+    }
+  }
+
+  async handleGetSettings() {
+    try {
+      const settings = await this.loadSettings();
+      return settings;
+    } catch (error) {
+      logger.error('Failed to get settings:', error);
+      throw error;
+    }
+  }
+
   async isEnabled() {
     const settings = await this.storageManager.get(STORAGE_KEYS.ENABLED);
     return settings[STORAGE_KEYS.ENABLED] !== false;
+  }
+
+  parseMessageTimestamp(timestamp) {
+    try {
+      if (!timestamp) {
+        return new Date().getTime();
+      }
+
+      // Handle ISO string timestamps
+      if (typeof timestamp === 'string') {
+        const date = new Date(timestamp);
+        if (!isNaN(date.getTime())) {
+          return date.getTime();
+        }
+      }
+
+      // Handle timestamp numbers
+      if (typeof timestamp === 'number') {
+        // Convert seconds to milliseconds if needed
+        return timestamp > 1000000000000 ? timestamp : timestamp * 1000;
+      }
+
+      // Fallback to current time
+      return new Date().getTime();
+    } catch (error) {
+      logger.warn('Failed to parse timestamp:', timestamp, error);
+      return new Date().getTime();
+    }
+  }
+
+  generateSequenceId(timestamp, messageId) {
+    // Create a sequence ID that combines timestamp and message ID for ordering
+    const paddedTimestamp = timestamp.toString().padStart(13, '0');
+    const shortId = messageId ? messageId.slice(-8) : Math.random().toString(36).slice(-8);
+    return `${paddedTimestamp}-${shortId}`;
   }
 }
 

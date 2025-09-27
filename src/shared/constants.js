@@ -27,6 +27,9 @@ export const MESSAGE_TYPES = {
   TEST_WEBHOOK: 'TEST_WEBHOOK',
   PLATFORM_DETECTED: 'PLATFORM_DETECTED',
   TOGGLE_CAPTURE: 'TOGGLE_CAPTURE',
+  CAPTURE_STARTED: 'CAPTURE_STARTED',
+  CAPTURE_STOPPED: 'CAPTURE_STOPPED',
+  GET_SETTINGS: 'GET_SETTINGS',
   ERROR: 'ERROR',
   SUCCESS: 'SUCCESS'
 };
@@ -61,11 +64,11 @@ export const PLATFORMS = {
     name: 'Telegram',
     hostname: 'web.telegram.org',
     selectors: {
-      message: '.message',
-      author: '.message-title',
-      content: '.message-text',
-      timestamp: '.message-time',
-      channel: '.chat-info-name'
+      message: '.message-out, .message-in, .message, [class*="message"]',
+      author: '.message-title, .peer-title, [class*="peer-title"], [class*="author"], .name',
+      content: '.message-text, .text-content, [class*="text-content"], .message-content',
+      timestamp: '.message-time, .time, [class*="time"], .timestamp',
+      channel: '.chat-info-name, .peer-title, [class*="chat-title"], .title'
     }
   },
   SLACK: {
@@ -95,13 +98,35 @@ export const PLATFORMS = {
   CIRCLE: {
     id: 'circle',
     name: 'Circle Community',
-    hostname: 'app.circle.so',
+    hostname: ['app.circle.so', 'circle.so', '*.circle.so'],
     selectors: {
-      message: '[data-testid="message-item"]',
-      author: '[data-testid="number-of-replies"]',
-      content: '[data-testid="message-text"]',
-      timestamp: '.text-timestamp',
-      channel: '[data-testid="space-title-name"]'
+      // Enhanced message selectors for different Circle.so layouts
+      message: '[data-testid="message-item"], [class*="message-"], .message-container, [role="article"][class*="message"], div[class*="post-"][class*="item"]',
+
+      // Multiple author selector fallbacks
+      author: '[data-testid="number-of-replies"], [data-testid="author-name"], [class*="author-"], [class*="username-"], .author-name, .post-author, [class*="member-name"]',
+
+      // Comprehensive content selectors for various Circle.so message types
+      content: '[data-testid="message-text"], [class*="message-content"], [class*="post-content"], .tiptap.ProseMirror, [class*="editor-content"], .message-body, [contenteditable="true"]',
+
+      // Enhanced timestamp selectors
+      timestamp: '.text-timestamp, [class*="timestamp"], [data-testid="timestamp"], .post-time, .message-time, time[datetime], [class*="time-"]',
+
+      // Channel/Space selectors
+      channel: '[data-testid="space-title-name"], [class*="space-title"], [class*="channel-name"], .community-name, .space-name, [class*="group-name"]',
+
+      // Container for message scanning optimization
+      container: '[class*="messages-"], [class*="feed-"], [class*="timeline-"], [data-testid="messages-container"], .message-list'
+    },
+
+    // Circle.so specific features
+    features: {
+      richTextEditor: true,
+      attachments: true,
+      reactions: true,
+      threads: true,
+      mentions: true,
+      realTimeUpdates: true
     }
   },
   WEBCHAT: {

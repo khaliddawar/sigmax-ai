@@ -278,58 +278,90 @@ class MessageParser {
   parseCircle(element) {
     try {
       const selectors = this.platformConfig?.selectors || {};
-      
-      // Extract message ID from element
-      const messageId = element.id || element.getAttribute('data-message-id');
-      
-      // Extract author - Circle stores it in the button with data-testid="number-of-replies"
-      const authorElement = element.querySelector(selectors.author || '[data-testid="number-of-replies"]');
+
+      // Extract message ID from element with multiple fallbacks
+      const messageId = element.id ||
+                       element.getAttribute('data-message-id') ||
+                       element.getAttribute('data-id') ||
+                       element.getAttribute('data-post-id') ||
+                       `circle-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // Enhanced author extraction with multiple fallbacks
       let author = 'Unknown';
-      if (authorElement) {
-        // The author text is usually the first part before any additional text
-        const authorText = authorElement.textContent?.trim() || '';
-        author = authorText.split(' ')[0] || 'Unknown';
+      const authorSelectors = selectors.author.split(', ');
+      for (const selector of authorSelectors) {
+        const authorElement = element.querySelector(selector.trim());
+        if (authorElement) {
+          const authorText = authorElement.textContent?.trim() || '';
+          // Handle different Circle.so author formats
+          if (selector.includes('number-of-replies')) {
+            // For replies button, extract username from text like "John Doe replied"
+            author = authorText.replace(/\s+(replied|commented|posted).*$/i, '').trim();
+          } else {
+            // For direct author elements
+            author = authorText.split(' ')[0] || authorText;
+          }
+          if (author && author !== 'Unknown') break;
+        }
       }
-      
-      // Extract content from the message text area
-      const contentElement = element.querySelector(selectors.content || '[data-testid="message-text"]');
+
+      // Enhanced content extraction with rich text support
       let content = '';
-      if (contentElement) {
-        // Circle uses TipTap editor, so we need to extract from the ProseMirror content
-        const proseMirrorContent = contentElement.querySelector('.tiptap.ProseMirror');
-        if (proseMirrorContent) {
-          content = this.extractMessageContent(proseMirrorContent);
-        } else {
-          content = this.extractMessageContent(contentElement);
+      const contentSelectors = selectors.content.split(', ');
+      for (const selector of contentSelectors) {
+        const contentElement = element.querySelector(selector.trim());
+        if (contentElement) {
+          // Handle TipTap/ProseMirror rich text editor
+          const proseMirrorContent = contentElement.querySelector('.tiptap.ProseMirror, .ProseMirror, [contenteditable="true"]');
+          if (proseMirrorContent) {
+            content = this.extractCircleRichContent(proseMirrorContent);
+          } else {
+            content = this.extractMessageContent(contentElement);
+          }
+          if (content && content.trim()) break;
         }
       }
-      
-      // Extract timestamp
-      const timestampElement = element.querySelector(selectors.timestamp || '.text-timestamp');
+
+      // Enhanced timestamp extraction
       let timestamp = new Date().toISOString();
-      if (timestampElement) {
-        const timeText = timestampElement.textContent?.trim();
-        if (timeText) {
-          // Convert relative time like "08:11 PM" to full timestamp
-          const today = new Date().toISOString().split('T')[0];
-          timestamp = formatTimestamp(`${today} ${timeText}`);
+      const timestampSelectors = selectors.timestamp.split(', ');
+      for (const selector of timestampSelectors) {
+        const timestampElement = element.querySelector(selector.trim());
+        if (timestampElement) {
+          const timeText = timestampElement.textContent?.trim() ||
+                          timestampElement.getAttribute('datetime') ||
+                          timestampElement.getAttribute('title');
+          if (timeText) {
+            timestamp = this.parseCircleTimestamp(timeText);
+            break;
+          }
         }
       }
-      
-      // Extract channel/space name
-      const channelElement = document.querySelector(selectors.channel || '[data-testid="space-title-name"]');
-      const channel = channelElement?.textContent?.trim() || 'Unknown Space';
-      
-      // Check for attachments (images, links, etc.)
+
+      // Extract channel/space name with fallbacks
+      let channel = 'Unknown Space';
+      const channelSelectors = selectors.channel.split(', ');
+      for (const selector of channelSelectors) {
+        const channelElement = document.querySelector(selector.trim());
+        if (channelElement?.textContent?.trim()) {
+          channel = channelElement.textContent.trim();
+          break;
+        }
+      }
+
+      // Enhanced attachment extraction
       const attachments = this.extractCircleAttachments(element);
-      
-      // Check for reactions
+
+      // Enhanced reaction extraction
       const reactions = this.extractCircleReactions(element);
-      
-      // Check if it's a reply/thread
-      const replyCount = element.querySelector('[data-testid="replies-block"]');
-      const hasReplies = replyCount !== null;
-      
+
+      // Check for replies/threads with multiple indicators
+      const hasReplies = element.querySelector('[data-testid="replies-block"], [class*="replies"], [class*="thread"]') !== null;
+      const replyCount = this.extractReplyCount(element);
+
+      // Extract additional Circle.so specific metadata
+      const metadata = this.extractCircleMetadata(element);
+
       return {
         messageId,
         author,
@@ -339,7 +371,10 @@ class MessageParser {
         attachments,
         reactions,
         hasReplies,
-        raw: element.outerHTML
+        replyCount,
+        metadata,
+        platform: 'circle',
+        raw: element.outerHTML.length > 5000 ? element.outerHTML.substring(0, 5000) + '...' : element.outerHTML
       };
     } catch (error) {
       logger.error('Error parsing Circle message:', error);
@@ -716,15 +751,15 @@ class MessageParser {
      * Generate context for images based on message content
      */
     if (!messageText) return `${imageType === 'chart' ? 'Trading Chart' : 'Shared Image'}`;
-    
+
     // Extract ticker symbols for context
     const tickerMatches = messageText.match(/\$?[A-Z]{1,5}\b/g);
     const tickers = tickerMatches ? tickerMatches.slice(0, 3).join(', ') : '';
-    
+
     // Look for time-related words
     const timeWords = messageText.match(/\b(daily|weekly|monthly|hourly|5min|15min|1h|4h|breakout|setup)\b/gi);
     const timeContext = timeWords ? timeWords[0] : '';
-    
+
     // Build context
     let context = '';
     if (tickers) {
@@ -738,8 +773,148 @@ class MessageParser {
     } else {
       context = imageType === 'chart' ? 'Trading Chart' : 'Shared Image';
     }
-    
+
     return context;
+  }
+
+  // Circle.so specific helper methods
+  extractCircleRichContent(element) {
+    /**
+     * Extract content from Circle.so's TipTap/ProseMirror rich text editor
+     */
+    if (!element) return '';
+
+    // Clone to avoid modifying original
+    const clone = element.cloneNode(true);
+
+    // Remove any editor UI elements
+    const editorElements = clone.querySelectorAll('[class*="editor-"], [class*="toolbar-"], [class*="menu-"]');
+    editorElements.forEach(el => el.remove());
+
+    // Handle mentions
+    const mentions = clone.querySelectorAll('[data-mention], [class*="mention"]');
+    mentions.forEach(mention => {
+      const name = mention.textContent || mention.getAttribute('data-mention-name') || '@user';
+      mention.textContent = `@${name}`;
+    });
+
+    // Handle links
+    const links = clone.querySelectorAll('a[href]');
+    links.forEach(link => {
+      const href = link.getAttribute('href');
+      const text = link.textContent || href;
+      link.textContent = `${text} (${href})`;
+    });
+
+    return this.extractMessageContent(clone);
+  }
+
+  parseCircleTimestamp(timeText) {
+    /**
+     * Parse Circle.so timestamp formats
+     */
+    if (!timeText) return new Date().toISOString();
+
+    try {
+      // Handle relative times like "2 minutes ago", "1 hour ago"
+      const relativeMatch = timeText.match(/(\d+)\s+(second|minute|hour|day|week)s?\s+ago/i);
+      if (relativeMatch) {
+        const amount = parseInt(relativeMatch[1]);
+        const unit = relativeMatch[2].toLowerCase();
+        const now = new Date();
+
+        switch (unit) {
+          case 'second': now.setSeconds(now.getSeconds() - amount); break;
+          case 'minute': now.setMinutes(now.getMinutes() - amount); break;
+          case 'hour': now.setHours(now.getHours() - amount); break;
+          case 'day': now.setDate(now.getDate() - amount); break;
+          case 'week': now.setDate(now.getDate() - (amount * 7)); break;
+        }
+
+        return now.toISOString();
+      }
+
+      // Handle time formats like "2:30 PM", "14:30"
+      const timeMatch = timeText.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+      if (timeMatch) {
+        const today = new Date();
+        let hours = parseInt(timeMatch[1]);
+        const minutes = parseInt(timeMatch[2]);
+        const period = timeMatch[3]?.toUpperCase();
+
+        if (period === 'PM' && hours !== 12) hours += 12;
+        if (period === 'AM' && hours === 12) hours = 0;
+
+        today.setHours(hours, minutes, 0, 0);
+        return today.toISOString();
+      }
+
+      // Try parsing as standard date
+      const date = new Date(timeText);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString();
+      }
+
+      return new Date().toISOString();
+    } catch (error) {
+      return new Date().toISOString();
+    }
+  }
+
+  extractReplyCount(element) {
+    /**
+     * Extract reply count from Circle.so elements
+     */
+    const replyElements = element.querySelectorAll('[data-testid="replies-block"], [class*="replies"], [class*="reply-count"]');
+    for (const replyEl of replyElements) {
+      const text = replyEl.textContent || '';
+      const match = text.match(/(\d+)\s*repl(y|ies)/i);
+      if (match) {
+        return parseInt(match[1]);
+      }
+    }
+    return 0;
+  }
+
+  extractCircleMetadata(element) {
+    /**
+     * Extract Circle.so specific metadata
+     */
+    const metadata = {};
+
+    // Check if it's a pinned message
+    if (element.querySelector('[class*="pinned"], [data-testid*="pin"]')) {
+      metadata.isPinned = true;
+    }
+
+    // Check for message type (post, comment, etc.)
+    const messageType = element.getAttribute('data-message-type') ||
+                       element.getAttribute('data-post-type') ||
+                       (element.closest('[data-testid="post"]') ? 'post' : 'comment');
+    if (messageType) {
+      metadata.messageType = messageType;
+    }
+
+    // Extract space/community info
+    const spaceElement = element.closest('[data-space-id], [data-community-id]');
+    if (spaceElement) {
+      metadata.spaceId = spaceElement.getAttribute('data-space-id') ||
+                        spaceElement.getAttribute('data-community-id');
+    }
+
+    // Check for moderation flags
+    if (element.querySelector('[class*="moderated"], [class*="flagged"]')) {
+      metadata.isModerated = true;
+    }
+
+    // Extract edit information
+    const editedElement = element.querySelector('[class*="edited"], [title*="edited"]');
+    if (editedElement) {
+      metadata.isEdited = true;
+      metadata.editedAt = editedElement.getAttribute('title') || editedElement.textContent;
+    }
+
+    return metadata;
   }
 }
 

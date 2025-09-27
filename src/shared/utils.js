@@ -271,7 +271,23 @@ export function createIdempotencyKey(data) {
  */
 export function detectPlatform(url) {
   const domain = getDomain(url);
-  
+
+  // Enhanced Circle.so detection - prioritize this since it's your main focus
+  if (domain.includes('circle.so') ||
+      domain.includes('app.circle.so') ||
+      domain.includes('julian-komar.com') ||
+      domain.endsWith('.circle.so')) {
+    return 'circle';
+  }
+
+  // Check for Circle.so-specific DOM elements as backup
+  if (document.querySelector('[data-testid="message-item"]') ||
+      document.querySelector('[data-testid="space-title-name"]') ||
+      document.querySelector('.tiptap.ProseMirror')) {
+    return 'circle';
+  }
+
+  // Other platforms (kept for compatibility but deprioritized)
   if (domain.includes('discord.com')) {
     return 'discord';
   }
@@ -284,16 +300,13 @@ export function detectPlatform(url) {
   if (domain.includes('whatsapp.com')) {
     return 'whatsapp';
   }
-  if (domain.includes('circle.so') || domain.includes('app.circle.so') || domain.includes('julian-komar.com')) {
-    return 'circle';
-  }
-  
-  // Check for generic web-based chat patterns
-  if (document.querySelector('[data-testid="message-item"]') || 
-      document.querySelector('.message-item') ||
+
+  // Check for generic web-based chat patterns (fallback)
+  if (document.querySelector('.message-item') ||
       document.querySelector('[class*="message-"][class*="item"]')) {
     return 'webchat';
   }
-  
-  return null;
+
+  // Default to Circle.so if no platform detected (since that's your focus)
+  return 'circle';
 }
