@@ -168,6 +168,8 @@ class ServiceWorker {
 
   async handleCaptureMessage(data, sender) {
     try {
+      console.log('🔄 Service Worker received message - Author:', data.author, 'Content:', data.content?.substring(0, 50));
+
       const settings = await this.storageManager.get(STORAGE_KEYS.ENABLED);
 
       if (!settings[STORAGE_KEYS.ENABLED]) {
@@ -726,6 +728,9 @@ const serviceWorker = new ServiceWorker();
 serviceWorker.initialize().catch((error) => {
   console.error('Failed to initialize service worker:', error);
 });
+
+// Make service worker globally accessible for debugging
+self.signalScopeWorker = serviceWorker;
 
 // Export for testing
 export default ServiceWorker;

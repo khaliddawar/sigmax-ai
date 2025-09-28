@@ -5,8 +5,8 @@
 
 // Configuration for local backend
 const LOCAL_CONFIG = {
-    webhook_url: 'http://localhost:8000/api/webhooks/signalscope',
-    webhookUrl: 'http://localhost:8000/api/webhooks/signalscope',  // Support both formats
+    webhook_url: 'http://localhost:8000/webhook',
+    webhookUrl: 'http://localhost:8000/webhook',  // Support both formats
     webhook_secret: 'webhook-secret-key',
     webhookSecret: 'webhook-secret-key',
     batch_size: 5,

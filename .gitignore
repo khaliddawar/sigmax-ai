@@ -7,23 +7,37 @@ yarn-error.log*
 # Build outputs
 build/
 dist/
-*.zip
+*.tgz
 
-# Environment files
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+.pytest_cache/
+
+# Environment variables
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS generated files
+# OS
 .DS_Store
 .DS_Store?
 ._*
@@ -36,90 +50,72 @@ Thumbs.db
 logs/
 *.log
 
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-.nyc_output/
-
-# Test files
-test-results/
-*.test.js.snap
-
 # Temporary files
-tmp/
-temp/
-
-# Debug files
+*.tmp
+*.temp
 debug_*.js
+test_*.html
 test_*.js
-manual_*.js
-force_*.js
+test_*.py
+*_test.js
+*_test.py
+*_debug.js
+*_diagnostic.js
+*_emergency.js
+*_fix.js
+*_working.js
+*_complete.js
+*_simple.js
+*_direct.js
+*_capture.js
+*_selector.js
+*_forwarder.py
+*_servers.py
+*_backend_test.py
+*_webhook_server.py
+*_test_server.py
+*_test_servers.py
+*_webhook.json
+configure_*.html
+extension_*.html
+telegram_*.js
+telegram_*.html
+circle_*.js
+flush_*.js
+reload_*.js
+fix_*.js
+simple_*.js
+simple_*.py
+start_*.py
 
-# Package files
-*.tgz
-*.tar.gz
+# Screenshots and images (except icons)
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+!assets/icons/*.png
+!src/assets/icons/*.png
+
+# Empty files
+nul
+empty
 
 # Cache
 .cache/
-.parcel-cache/
+*.cache
 
-# Optional npm cache directory
-.npm
+# Coverage reports
+coverage/
+.nyc_output/
 
-# Optional REPL history
-.node_repl_history
+# Extension development
+*.crx
+*.pem
+*.zip
 
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-
-# Webpack stats
-webpack-stats.json
-
-# Extension specific
-manifest-v2.json
-manifest-v3.json
-
-# Exclude embedded repositories and problematic files
-backend/
-signalscope-backend/
-.bmad-core/
-.claude/
-.clinerules/
-.cursor/rules/
-.eslintrc.js
-.prettierrc
-.gemini/
-.github/chatmodes/
-.qwen/
-.windsurf/
-.ai/
-
-# Exclude documentation that's not needed for the extension
-Docs/
-*.md
-!README.md
-!LICENSE
-
-# Exclude debug and test files
-debug_*.js
-test_*.js
-manual_*.js
-force_*.js
-flush_*.js
-fix_*.js
-*.html
-!src/**/*.html
-
-# Windows specific
-nul
+# Documentation drafts
+*_DRAFT.md
+*_TEMP.md
+*_OLD.md

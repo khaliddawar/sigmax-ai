@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(curl:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(set PYTHONPATH=%cd%)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(node:*)",
+      "Bash(chcp:*)",
+      "Bash(timeout:*)",
+      "WebSearch",
+      "Bash(npx:*)",
+      "Bash(npm install:*)",
+      "Read(//c/Users/KhalidNoor/AppData/Roaming/Claude/**)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:circle.so)",
+      "Bash(npm run dev:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(taskkill.exe:*)",
+      "Bash(cmd /c:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "defaultMode": "acceptEdits"
+  }
+}

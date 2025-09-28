@@ -9,7 +9,7 @@ class DomObserver {
     this.observer = null;
     this.isObserving = false;
     
-    // Default options
+    // Default options - reduced debounce for faster message capture
     this.options = {
       childList: true,
       subtree: true,
@@ -17,7 +17,7 @@ class DomObserver {
       attributeOldValue: false,
       characterData: false,
       characterDataOldValue: false,
-      debounceDelay: 100,
+      debounceDelay: 50, // Reduced from 100ms to 50ms for faster response
       ...options
     };
     

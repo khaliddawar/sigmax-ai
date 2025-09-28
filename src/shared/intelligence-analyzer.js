@@ -3,13 +3,31 @@ import { createLogger } from './logger.js';
 const logger = createLogger('IntelligenceAnalyzer');
 
 class IntelligenceAnalyzer {
+  // Main analysis method (alias for analyzeMessage)
+  analyze(content) {
+    return this.analyzeMessage(content);
+  }
+
   analyzeMessage(content) {
     try {
-      const entities = this.extractEntities(content);
-      const sentiment = this.analyzeSentiment(content);
-      const importance = this.calculateImportance(content, entities, sentiment);
-      const tradingSignal = this.extractTradingSignal(content, entities, sentiment);
-      
+      // Debug logging
+      console.log('🔬 Intelligence Analyzer Debug:', {
+        inputType: typeof content,
+        inputValue: content,
+        isString: typeof content === 'string'
+      });
+
+      // Ensure content is a string
+      const textContent = typeof content === 'string' ? content :
+                         (content?.content || content?.text || String(content) || '');
+
+      console.log('🔬 Extracted text content:', textContent);
+
+      const entities = this.extractEntities(textContent);
+      const sentiment = this.analyzeSentiment(textContent);
+      const importance = this.calculateImportance(textContent, entities, sentiment);
+      const tradingSignal = this.extractTradingSignal(textContent, entities, sentiment);
+
       return {
         entities,
         sentiment,

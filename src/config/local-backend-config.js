@@ -5,7 +5,7 @@
 
 export const LOCAL_BACKEND_CONFIG = {
   // Local backend URL
-  WEBHOOK_URL: 'http://localhost:8000/api/webhooks/signalscope',
+  WEBHOOK_URL: 'http://localhost:8000/webhook',
   
   // Webhook secret (must match backend .env)
   WEBHOOK_SECRET: 'webhook-secret-key',

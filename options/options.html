@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignalScope Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>SignalScope Settings</h1>
+      <p class="subtitle">Configure your webhook and capture settings</p>
+    </header>
+
+    <main>
+      <section class="settings-section">
+        <h2>Webhook Configuration</h2>
+        <div class="form-group">
+          <label for="webhookUrl">Webhook URL</label>
+          <input type="url" id="webhookUrl" placeholder="https://your-webhook-endpoint.com/webhook" />
+          <span class="help-text">The endpoint where captured messages will be sent</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="webhookSecret">Webhook Secret (Optional)</label>
+          <input type="password" id="webhookSecret" placeholder="Your secret key for HMAC signing" />
+          <span class="help-text">Used for HMAC-SHA256 signing of webhook payloads</span>
+        </div>
+        
+        <button id="testWebhook" class="btn btn-secondary">Test Webhook</button>
+      </section>
+
+      <section class="settings-section">
+        <h2>Capture Settings</h2>
+        
+        <div class="form-group">
+          <label for="batchSize">Batch Size</label>
+          <input type="number" id="batchSize" min="1" max="100" value="10" />
+          <span class="help-text">Number of messages to send in each webhook batch</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="batchInterval">Batch Interval (seconds)</label>
+          <input type="number" id="batchInterval" min="1" max="300" value="5" />
+          <span class="help-text">How often to process message batches</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="retryAttempts">Retry Attempts</label>
+          <input type="number" id="retryAttempts" min="0" max="10" value="3" />
+          <span class="help-text">Number of times to retry failed webhook deliveries</span>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h2>Platform Settings</h2>
+        
+        <div class="form-group">
+          <label>Enabled Platforms</label>
+          <div class="checkbox-group">
+            <label class="checkbox">
+              <input type="checkbox" id="platform-discord" value="discord" checked />
+              <span>Discord</span>
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="platform-telegram" value="telegram" checked />
+              <span>Telegram</span>
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="platform-slack" value="slack" checked />
+              <span>Slack</span>
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="platform-whatsapp" value="whatsapp" checked />
+              <span>WhatsApp</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h2>Advanced Settings</h2>
+        
+        <details>
+          <summary>Custom Selectors</summary>
+          <div class="form-group">
+            <label for="customSelectors">Custom CSS Selectors (JSON)</label>
+            <textarea id="customSelectors" rows="6" placeholder='{
+  "message": ".custom-message",
+  "author": ".custom-author",
+  "content": ".custom-content"
+}'></textarea>
+            <span class="help-text">Override default selectors for specific platforms</span>
+          </div>
+        </details>
+        
+        <details>
+          <summary>Export/Import Settings</summary>
+          <div class="export-import">
+            <button id="exportSettings" class="btn btn-secondary">Export Settings</button>
+            <button id="importSettings" class="btn btn-secondary">Import Settings</button>
+            <input type="file" id="importFile" accept=".json" style="display: none;" />
+          </div>
+        </details>
+      </section>
+
+      <section class="settings-section">
+        <h2>Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">Total Messages Sent:</span>
+            <span class="stat-value" id="statTotalSent">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Failed Messages:</span>
+            <span class="stat-value" id="statTotalFailed">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Last Success:</span>
+            <span class="stat-value" id="statLastSuccess">Never</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Queue Size:</span>
+            <span class="stat-value" id="statQueueSize">0</span>
+          </div>
+        </div>
+        <button id="clearStats" class="btn btn-danger">Clear Statistics</button>
+      </section>
+    </main>
+
+    <footer>
+      <button id="saveSettings" class="btn btn-primary">Save Settings</button>
+      <button id="resetSettings" class="btn btn-secondary">Reset to Defaults</button>
+    </footer>
+
+    <div id="notification" class="notification"></div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

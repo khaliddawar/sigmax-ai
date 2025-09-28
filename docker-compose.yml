@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  signalScope-server:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+    volumes:
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add a web interface for monitoring
+  signalScope-monitor:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./dist/monitor:/usr/share/nginx/html:ro
+    depends_on:
+      - signalScope-server
+    restart: unless-stopped

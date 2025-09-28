@@ -65,8 +65,8 @@ export const PLATFORMS = {
     hostname: 'web.telegram.org',
     selectors: {
       message: '.message-out, .message-in, .message, [class*="message"]',
-      author: '.message-title, .peer-title, [class*="peer-title"], [class*="author"], .name',
-      content: '.message-text, .text-content, [class*="text-content"], .message-content',
+      author: '.message-title, .peer-title, [class*="peer-title"], [class*="author"], .name, .translatable-message strong',
+      content: '.message-text, .text-content, [class*="text-content"], .message-content, .translatable-message',
       timestamp: '.message-time, .time, [class*="time"], .timestamp',
       channel: '.chat-info-name, .peer-title, [class*="chat-title"], .title'
     }
@@ -100,11 +100,13 @@ export const PLATFORMS = {
     name: 'Circle Community',
     hostname: ['app.circle.so', 'circle.so', '*.circle.so'],
     selectors: {
-      // Enhanced message selectors for different Circle.so layouts
-      message: '[data-testid="message-item"], [class*="message-"], .message-container, [role="article"][class*="message"], div[class*="post-"][class*="item"]',
+      // Enhanced message selectors for different Circle.so layouts - target complete message containers
+      // Prioritize proper message containers that include both author and content
+      message: '[data-testid="message-item"], [class*="message-container"], [class*="chat-message"], .message-container, [role="article"], article, div[class*="post-"][class*="item"], [class*="post-container"]',
 
-      // Multiple author selector fallbacks
-      author: '[data-testid="number-of-replies"], [data-testid="author-name"], [class*="author-"], [class*="username-"], .author-name, .post-author, [class*="member-name"]',
+      // Multiple author selector fallbacks - prioritize actual author elements
+      // Note: .text-sm.font-semibold is for actual author, .text-sm.font-medium is for timestamps
+      author: '[data-testid="author-name"], [data-testid="number-of-replies"], [class*="author-"], [class*="username-"], .author-name, .post-author, [class*="member-name"], [class*="user-name"], .text-sm.font-semibold, [data-testid="user-name"]',
 
       // Comprehensive content selectors for various Circle.so message types
       content: '[data-testid="message-text"], [class*="message-content"], [class*="post-content"], .tiptap.ProseMirror, [class*="editor-content"], .message-body, [contenteditable="true"]',

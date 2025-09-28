@@ -162,6 +162,12 @@ class MessageParser {
       // Extract content
       const contentElement = element.querySelector(selectors.content || '.message-text');
       const content = this.extractMessageContent(contentElement);
+
+      // Skip Telegram system messages like "Unknown in #general"
+      if (author === 'Unknown' && /^Unknown in #/.test(content)) {
+        logger.debug('Skipping Telegram system message with unknown author');
+        return null;
+      }
       
       // Extract timestamp
       const timeElement = element.querySelector(selectors.timestamp || '.message-time');
@@ -279,6 +285,54 @@ class MessageParser {
     try {
       const selectors = this.platformConfig?.selectors || {};
 
+      // Early validation: check if this looks like a real message element
+      const testId = element.getAttribute('data-testid');
+      const className = element.className || '';
+      
+      // Skip elements that are clearly not messages
+      if (testId && !testId.includes('message') && !testId.includes('post')) {
+        console.log('🔍 Skipping non-message element with testid:', testId);
+        return null;
+      }
+      
+      // If this is just a content element (message-text), try to find the parent message container
+      if (testId === 'message-text') {
+        console.log('🔍 Found message-text element, looking for parent message container...');
+        let messageContainer = element.parentElement;
+        let attempts = 0;
+        
+        // Walk up the DOM to find a proper message container
+        while (messageContainer && attempts < 5) {
+          const containerTestId = messageContainer.getAttribute('data-testid');
+          const containerClass = messageContainer.className || '';
+          
+          // Look for elements that likely contain the full message structure
+          if (containerTestId === 'message-item' || 
+              containerClass.includes('message-container') ||
+              containerClass.includes('chat-message') ||
+              messageContainer.querySelector('[data-testid="number-of-replies"]')) {
+            console.log('🔍 Found parent message container, using that instead');
+            return this.parseCircle(messageContainer);
+          }
+          
+          messageContainer = messageContainer.parentElement;
+          attempts++;
+        }
+        
+        console.log('🔍 No proper message container found, proceeding with content element');
+      }
+      
+      // Skip elements with very little text content (likely UI elements)
+      const textContent = element.textContent?.trim() || '';
+      if (textContent.length < 10) {
+        console.log('🔍 Skipping element with minimal text content:', textContent);
+        return null;
+      }
+
+      console.log('🔍 Circle.so Message Detection - Element tag:', element.tagName);
+      console.log('🔍 Circle.so Message Detection - Element classes:', className);
+      console.log('🔍 Circle.so Message Detection - Element testid:', testId);
+
       // Extract message ID from element with multiple fallbacks
       const messageId = element.id ||
                        element.getAttribute('data-message-id') ||
@@ -289,19 +343,187 @@ class MessageParser {
       // Enhanced author extraction with multiple fallbacks
       let author = 'Unknown';
       const authorSelectors = selectors.author.split(', ');
+
+      console.log('🔍 Circle.so Author Debug - Element HTML:', element.outerHTML.substring(0, 1000));
+      console.log('🔍 Circle.so Author Debug - Available selectors:', authorSelectors);
+
+      // Let's also check the parent elements to see if author info is there
+      console.log('🔍 Circle.so Parent Debug - Parent element:', element.parentElement?.outerHTML.substring(0, 800));
+      console.log('🔍 Circle.so Parent Debug - Grandparent element:', element.parentElement?.parentElement?.outerHTML.substring(0, 800));
+
+      // Log all child elements with their classes and text
+      console.log('🔍 All child elements in message:');
+      const allChildren = element.querySelectorAll('*');
+      allChildren.forEach((child, index) => {
+        if (index < 20) { // Limit to first 20 to avoid spam
+          const text = child.textContent?.trim();
+          if (text && text.length > 0 && text.length < 100) {
+            console.log(`  [${index}] ${child.tagName}.${child.className}: "${text}"`);
+          }
+        }
+      });
+
       for (const selector of authorSelectors) {
         const authorElement = element.querySelector(selector.trim());
+        console.log(`🔍 Testing selector: "${selector.trim()}" - Found element:`, authorElement);
         if (authorElement) {
           const authorText = authorElement.textContent?.trim() || '';
-          // Handle different Circle.so author formats
-          if (selector.includes('number-of-replies')) {
-            // For replies button, extract username from text like "John Doe replied"
-            author = authorText.replace(/\s+(replied|commented|posted).*$/i, '').trim();
-          } else {
-            // For direct author elements
-            author = authorText.split(' ')[0] || authorText;
+          console.log(`🔍 Author text from "${selector.trim()}":`, authorText);
+          if (authorText && authorText !== 'Unknown' && authorText.length > 0) {
+            // Clean up author text - take first name or full name if reasonable length
+            if (authorText.length <= 50) { // Reasonable author name length
+              author = authorText;
+              console.log(`✅ Found author: "${author}" using selector: "${selector.trim()}"`);
+              break;
+            } else {
+              // If too long, might be containing other text, try to extract name
+              const nameMatch = authorText.match(/^([A-Za-z\s]+)/);
+              if (nameMatch && nameMatch[1].trim().length > 0) {
+                author = nameMatch[1].trim();
+                console.log(`✅ Extracted author: "${author}" using selector: "${selector.trim()}"`);
+                break;
+              }
+            }
           }
-          if (author && author !== 'Unknown') break;
+        }
+      }
+
+      // If still unknown, try parent/ancestor elements (where Circle.so actually stores author info)
+      if (author === 'Unknown') {
+        console.log('🔍 Trying parent/ancestor author detection...');
+
+        // Look in parent elements for author info - Circle.so stores it there
+        const parentElement = element.parentElement;
+        const grandparentElement = element.parentElement?.parentElement;
+
+        console.log('🔍 Parent element exists:', !!parentElement);
+        console.log('🔍 Grandparent element exists:', !!grandparentElement);
+
+        // Check parent for author button with data-testid="number-of-replies"
+        if (parentElement) {
+          console.log('🔍 Parent HTML:', parentElement.outerHTML.substring(0, 500));
+          const parentAuthorButton = parentElement.querySelector('[data-testid="number-of-replies"]');
+          console.log('🔍 Parent author button found:', !!parentAuthorButton);
+          if (parentAuthorButton?.textContent?.trim()) {
+            const authorText = parentAuthorButton.textContent.trim();
+            console.log('🔍 Parent author text:', authorText);
+            // Remove any span content (like reply counts)
+            const cleanAuthor = authorText.replace(/<[^>]*>/g, '').trim();
+            if (cleanAuthor && cleanAuthor.length > 0) {
+              author = cleanAuthor;
+              console.log(`✅ Found author in parent via number-of-replies: "${author}"`);
+            }
+          }
+        }
+
+        // Check grandparent for author info if still not found
+        if (author === 'Unknown' && grandparentElement) {
+          console.log('🔍 Grandparent HTML:', grandparentElement.outerHTML.substring(0, 500));
+          const grandparentAuthorButton = grandparentElement.querySelector('[data-testid="number-of-replies"]');
+          console.log('🔍 Grandparent author button found:', !!grandparentAuthorButton);
+          if (grandparentAuthorButton?.textContent?.trim()) {
+            const authorText = grandparentAuthorButton.textContent.trim();
+            console.log('🔍 Grandparent author text:', authorText);
+            const cleanAuthor = authorText.replace(/<[^>]*>/g, '').trim();
+            if (cleanAuthor && cleanAuthor.length > 0) {
+              author = cleanAuthor;
+              console.log(`✅ Found author in grandparent via number-of-replies: "${author}"`);
+            }
+          }
+        }
+      }
+
+      // If still unknown, try more aggressive approaches
+      if (author === 'Unknown') {
+        console.log('🔍 Trying aggressive author detection...');
+
+        // Method 1: Look for any links with /user/ or /profile/ in href
+        const userLinks = element.querySelectorAll('a[href*="/user/"], a[href*="/profile/"], a[href*="/member/"]');
+        for (const link of userLinks) {
+          const linkText = link.textContent?.trim();
+          if (linkText && linkText.length > 0 && linkText.length <= 50) {
+            author = linkText;
+            console.log(`✅ Found author via user link: "${author}"`);
+            break;
+          }
+        }
+
+        // Method 2: Look for any element that contains typical user-related patterns
+        if (author === 'Unknown') {
+          const allElements = element.querySelectorAll('*');
+          for (const el of allElements) {
+            const classList = Array.from(el.classList);
+            const hasUserClass = classList.some(cls =>
+              cls.includes('user') ||
+              cls.includes('author') ||
+              cls.includes('name') ||
+              cls.includes('member') ||
+              cls.includes('profile')
+            );
+
+            if (hasUserClass && el.textContent?.trim()) {
+              const text = el.textContent.trim();
+              if (text.length > 0 && text.length <= 50 && !text.includes('\n')) {
+                author = text;
+                console.log(`✅ Found author via class pattern: "${author}" (${el.className})`);
+                break;
+              }
+            }
+          }
+        }
+
+        // Method 3: Look for any text that looks like a name (starts with capital letter, reasonable length)
+        if (author === 'Unknown') {
+          const allElements = element.querySelectorAll('*');
+          console.log('🔍 Checking all elements for name patterns...');
+          for (const el of allElements) {
+            const text = el.textContent?.trim();
+            if (text && text.length > 1 && text.length <= 30) {
+              console.log(`  Checking text: "${text}" - Pattern match: ${/^[A-Z][a-zA-Z\s]+$/.test(text)}`);
+              if (/^[A-Z][a-zA-Z\s]+$/.test(text) &&
+                  !text.includes('\n') &&
+                  !text.includes('ago') &&
+                  !text.includes(':') &&
+                  !text.includes('•')) {
+                // Skip if it's likely not a name
+                if (text.toLowerCase().includes('reply') ||
+                    text.toLowerCase().includes('comment') ||
+                    text.toLowerCase().includes('post') ||
+                    text.toLowerCase().includes('message')) {
+                  console.log(`  Skipping "${text}" - contains excluded words`);
+                  continue;
+                }
+                author = text;
+                console.log(`✅ Found author via text pattern: "${author}"`);
+                break;
+              }
+            }
+          }
+        }
+
+        // Method 4: Last resort - try to extract from any spans or divs with short text that could be names
+        if (author === 'Unknown') {
+          console.log('🔍 Last resort - checking spans and divs for potential names...');
+          const spans = element.querySelectorAll('span, div');
+          for (const span of spans) {
+            const text = span.textContent?.trim();
+            if (text &&
+                text.length >= 2 &&
+                text.length <= 25 &&
+                !text.includes('Have a great weekend') && // Exclude the actual message content
+                !text.includes('ago') &&
+                !text.includes(':') &&
+                !text.includes('•') &&
+                !text.includes('#')) {
+              console.log(`  Potential name candidate: "${text}"`);
+              // If it contains only letters and spaces, might be a name
+              if (/^[a-zA-Z\s]+$/.test(text)) {
+                author = text;
+                console.log(`✅ Found author via span/div text: "${author}"`);
+                break;
+              }
+            }
+          }
         }
       }
 
@@ -362,7 +584,7 @@ class MessageParser {
       // Extract additional Circle.so specific metadata
       const metadata = this.extractCircleMetadata(element);
 
-      return {
+      const result = {
         messageId,
         author,
         content,
@@ -376,6 +598,18 @@ class MessageParser {
         platform: 'circle',
         raw: element.outerHTML.length > 5000 ? element.outerHTML.substring(0, 5000) + '...' : element.outerHTML
       };
+
+      console.log('🎯 Circle.so Final Parsed Message:', {
+        messageId,
+        author,
+        content: content.substring(0, 100) + '...',
+        timestamp,
+        channel
+      });
+
+      console.log('📡 About to send webhook with author:', author);
+
+      return result;
     } catch (error) {
       logger.error('Error parsing Circle message:', error);
       return this.genericParse(element);

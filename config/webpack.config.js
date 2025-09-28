@@ -14,6 +14,8 @@ module.exports = {
   entry: {
     'background/service-worker': './src/background/service-worker.js',
     'content/content-script': './src/content/content-script.js',
+    'content/content-script-robust': './src/content/content-script-robust.js',
+    'content/content-script-enhanced': './src/content/content-script-enhanced.js',
     'popup/popup': './src/popup/popup.js',
     'options/options': './src/options/options.js',
     'sidebar/sidebar': './src/sidebar/sidebar.js'

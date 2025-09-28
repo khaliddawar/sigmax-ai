@@ -69,7 +69,7 @@ Use the included Circle-to-Telegram bridge for instant setup:
 
 ```bash
 # Start the bridge server
-python circle_to_telegram_server.py
+python servers/simple_telegram_server.py
 ```
 
 **Features:**
@@ -294,6 +294,143 @@ The extension provides detailed logging:
 - **Service Worker**: Webhook delivery and queue management
 - **Bridge Server**: Message filtering and Telegram forwarding
 
+## 🛠️ Troubleshooting Guide
+
+### Common Issues & Solutions
+
+#### 1. **"Port 8000 already in use" Error**
+```bash
+# Find process using port 8000
+netstat -ano | findstr :8000
+
+# Kill the process (replace PID with actual process ID)
+Stop-Process -Id [PID] -Force
+
+# Restart server
+python servers/simple_telegram_server.py
+```
+
+#### 2. **Messages Not Reaching Telegram**
+**Check 1: Verify Extension is Capturing Messages**
+```javascript
+// In Circle.so page console
+console.log('Extension present:', !!window.signalScopeEnhanced);
+```
+
+**Check 2: Test Telegram API Directly**
+```python
+# Test if Telegram credentials work
+python test_telegram_direct.py
+```
+
+**Check 3: Monitor Server Logs**
+- Look for `📨 Received X message(s)` in server output
+- Check for `✅ Sent successfully` confirmations
+- Watch for attachment debugging: `📎 Processing X attachment(s)...`
+
+#### 3. **Duplicate Messages in Telegram**
+**Solution**: Ensure using updated `simple_telegram_server.py` with deduplication:
+```bash
+# Look for this log in server output:
+📋 Processing X unique message(s) (filtered Y duplicates)
+```
+
+#### 4. **Wrong Authors (Timestamps Instead of Names)**
+**Check**: Extension should log author detection:
+```javascript
+// Look for these logs in browser console:
+✅ Found author: "Julian Komar" using selector: "[data-testid="number-of-replies"]"
+// NOT:
+✅ Found author: "11:23 PM" using selector: ".text-sm.font-medium"
+```
+
+**Fix**: Rebuild extension after selector updates:
+```bash
+npm run build
+# Reload extension in chrome://extensions/
+```
+
+#### 5. **Images Not Forwarding**
+**Check 1**: Server should show attachment debugging:
+```
+🔍 Message debug - Attachments: 1 items
+  📎 Attachment 1: type=image, url=https://app.circle.so/rails/...
+📸 Sending image 1: https://app.circle.so/rails/...
+```
+
+**Check 2**: Verify Circle.so attachment extraction:
+```javascript
+// In Circle.so console, inspect message elements:
+document.querySelectorAll('img[src]:not([class*="user-image"])');
+```
+
+#### 6. **Extension Not Loading**
+```bash
+# Check build status
+npm run build
+
+# Verify manifest.json is valid
+# Check chrome://extensions/ for error messages
+# Look for content script injection in DevTools > Sources
+```
+
+### Environment Troubleshooting
+
+#### Telegram Bot Setup Issues
+```bash
+# Test bot token validity
+curl https://api.telegram.org/bot[BOT_TOKEN]/getMe
+
+# Get chat ID
+curl https://api.telegram.org/bot[BOT_TOKEN]/getUpdates
+```
+
+#### Python Environment Issues
+```bash
+# Check Python version (3.11+ recommended)
+python --version
+
+# Install missing dependencies
+pip install fastapi uvicorn requests python-dotenv
+
+# Test minimal server
+python -c "import fastapi, uvicorn, requests; print('Dependencies OK')"
+```
+
+### Performance Monitoring
+
+#### Extension Performance
+```javascript
+// Monitor message capture rate in console
+// Look for: "[HybridCapture] [INFO] New messages detected: X"
+// Should be consistent with actual new messages in chat
+```
+
+#### Server Performance
+```bash
+# Monitor request rate
+# Normal: 1-5 requests per minute during active chat
+# High: >10 requests per minute (may indicate duplicate issues)
+```
+
+### Debug Logging Levels
+
+#### Minimal Logging (Production)
+- Only errors and successful sends
+- `✅ Sent successfully` / `❌ Failed to send`
+
+#### Detailed Logging (Debug)
+- Message structure details
+- Attachment information  
+- Deduplication statistics
+- Full request/response logs
+
+#### Maximum Logging (Development)
+- DOM element inspection
+- Selector testing results
+- Message parsing steps
+- Network request details
+
 ## 🎯 Supported Platforms
 
 | Platform | Status | Optimization Level | Features |
@@ -334,8 +471,8 @@ Recent optimizations have improved:
 
 2. **Server Deployment**:
    ```bash
-   # Deploy bridge server
-   python circle_to_telegram_server.py
+   # Deploy simple bridge server (recommended)
+   python servers/simple_telegram_server.py
 
    # Or deploy full backend
    cd signalscope-backend
@@ -351,7 +488,85 @@ Recent optimizations have improved:
    WEBHOOK_SECRET=your_secure_secret
    ```
 
-## 🔄 Recent Updates
+## 🔄 Recent Updates & Fixes
+
+### Version 1.3.0 - Circle.so Pipeline Fixes (September 2025)
+
+#### 🐛 **Issues Resolved:**
+
+**1. Circle.so Message Parsing Problems**
+- **Issue**: Extension was capturing timestamp elements ("11:23 PM") as message authors instead of real usernames
+- **Root Cause**: Selector `.text-sm.font-medium` matched both author buttons and timestamp buttons
+- **Fix**: Updated selectors to prioritize `[data-testid="number-of-replies"]` and `.text-sm.font-semibold` (actual authors) over timestamp elements
+- **Result**: ✅ Now correctly captures real authors like "Julian Komar" instead of "11:23 PM"
+
+**2. Duplicate Message Transmission**
+- **Issue**: Same message appeared twice in Telegram due to extension capturing multiple DOM elements
+- **Root Cause**: Extension captured both `[data-testid="message-text"]` content elements and parent message containers
+- **Fix**: Added smart container detection - when content element is captured, automatically finds and uses parent message container
+- **Result**: ✅ Each message now sent only once to Telegram
+
+**3. Telegram Delivery Pipeline Failure**
+- **Issue**: Messages reached `/messages` endpoint but weren't delivered to Telegram
+- **Root Cause**: Complex backend service dependencies and import path issues
+- **Fix**: Created `simple_telegram_server.py` - minimal, reliable bridge that bypasses complex dependencies
+- **Result**: ✅ Direct extension → Telegram pipeline now works reliably
+
+**4. Server Port Conflicts**
+- **Issue**: "Error 10048" - port 8000 already in use by orphaned processes
+- **Root Cause**: Previous Python processes not properly terminated
+- **Fix**: Added process identification and termination commands (`netstat`, `Stop-Process`)
+- **Result**: ✅ Clean server startup and shutdown
+
+**5. Environment Variable Loading**
+- **Issue**: Telegram credentials not loading from `.env` file
+- **Root Cause**: `.env` file path resolution in different directory contexts
+- **Fix**: Explicit path loading: `load_dotenv(signalscope_backend_path / ".env")`
+- **Result**: ✅ Telegram Bot Token and Chat ID now load correctly
+
+#### 🆕 **New Features Added:**
+
+**1. Image/Chart Support**
+- **Feature**: Extension now captures and forwards trading charts and images from Circle.so
+- **Implementation**: Enhanced attachment extraction with `extractCircleAttachments()` method
+- **Telegram Integration**: Images sent via `sendPhoto` API with author captions
+- **Result**: ✅ Trading charts and screenshots now forward automatically to Telegram
+
+**2. Advanced Message Deduplication**
+- **Feature**: Multi-layer deduplication system prevents page refresh duplicates
+- **Implementation**: 
+  - Content-based hashing (author + content + timestamp)
+  - IndexedDB storage for persistence across page refreshes
+  - Automatic cleanup and expiry management
+- **Result**: ✅ No duplicate messages when refreshing Circle.so page
+
+**3. Server-Side Deduplication**
+- **Feature**: Additional server-side duplicate prevention
+- **Implementation**: Messages deduplicated by `f"{author}:{content[:100]}"` key
+- **Result**: ✅ Eliminates duplicate messages from multiple DOM captures
+
+**4. Enhanced Debug Logging**
+- **Feature**: Comprehensive logging at every pipeline stage
+- **Implementation**: Attachment debugging, message structure logging, delivery confirmation
+- **Result**: ✅ Easy troubleshooting and monitoring of message flow
+
+#### 🔧 **Technical Improvements:**
+
+**1. Simplified Architecture**
+```
+OLD: Extension → Complex Backend → Telegram Service → Telegram API
+NEW: Extension → Simple Bridge → Telegram API (Direct)
+```
+
+**2. Robust Error Handling**
+- Process management for server conflicts
+- Import path resolution for different environments
+- Graceful fallbacks for missing attachments
+
+**3. Performance Optimization**
+- Minimal dependencies for bridge server
+- Direct API calls to Telegram
+- Efficient deduplication algorithms
 
 ### Version 1.2.0 - Circle.so Optimization
 - **🎯 Circle.so Focus**: Complete optimization for Circle.so platform

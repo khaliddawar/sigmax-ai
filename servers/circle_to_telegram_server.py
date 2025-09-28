@@ -12,6 +12,10 @@ from pathlib import Path
 signalscope_backend_path = Path(__file__).parent / "signalscope-backend"
 sys.path.insert(0, str(signalscope_backend_path))
 
+# Load environment variables from signalscope-backend directory
+from dotenv import load_dotenv
+load_dotenv(signalscope_backend_path / ".env")
+
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -43,6 +47,25 @@ telegram_service = TelegramService()
 
 # Store recent messages for debugging
 recent_messages = []
+
+def is_timestamp_author(author):
+    """Check if author looks like a timestamp (e.g., '11:23 PM', '08:45 AM')"""
+    if not author or len(author) < 4:
+        return False
+    
+    import re
+    # Match patterns like "11:23 PM", "8:45 AM", "14:30", etc.
+    timestamp_patterns = [
+        r'^\d{1,2}:\d{2}\s*(AM|PM)$',  # 12-hour format with AM/PM
+        r'^\d{1,2}:\d{2}$',            # 24-hour format
+        r'^\d{1,2}:\d{2}:\d{2}$'       # With seconds
+    ]
+    
+    for pattern in timestamp_patterns:
+        if re.match(pattern, author.strip(), re.IGNORECASE):
+            return True
+    
+    return False
 
 @app.get("/")
 async def root():
@@ -86,12 +109,18 @@ async def webhook_endpoint(request: Request):
                 author = message.get('author', 'Unknown')
                 content = message.get('content', '').strip()
 
-                # Only include messages with real authors and content
-                if author != 'Unknown' and content:
+                # Filter timestamp authors and system messages
+                should_skip = (
+                    (author == 'Unknown' and 'in #general' in content) or  # System messages
+                    (content.strip().startswith('💭 Unknown in #')) or      # Emoji system messages  
+                    is_timestamp_author(author)                            # Timestamp authors like "11:23 PM"
+                )
+
+                if not should_skip:
                     good_messages.append(message)
                     logger.info(f"✅ Good message: {author} - {content[:50]}...")
                 else:
-                    logger.debug(f"⏭️ Skipping duplicate/empty message: {author} - {content[:30]}...")
+                    logger.info(f"⏭️ FILTERED OUT: {author} - {content[:50]}...")
 
             for i, message in enumerate(good_messages):
                 message['received_at'] = timestamp
@@ -116,22 +145,36 @@ async def webhook_endpoint(request: Request):
                     await asyncio.sleep(0.2)
 
         else:
-            # Single message
+            # Single message - apply same filtering
+            author = data.get('author', 'Unknown')
+            content = data.get('content', '').strip()
+            
+            should_skip = (
+                (author == 'Unknown' and 'in #general' in content) or  # System messages
+                (content.strip().startswith('💭 Unknown in #')) or      # Emoji system messages  
+                is_timestamp_author(author)                            # Timestamp authors like "11:23 PM"
+            )
+            
+            if should_skip:
+                logger.info(f"⏭️ FILTERED SINGLE: {author} - {content[:50]}...")
+                return {"status": "skipped", "reason": "filtered_message"}
+            
             data['received_at'] = timestamp
             recent_messages.append(data)
 
-            logger.info(f"📝 Message from {data.get('author', 'Unknown')}: {data.get('content', '')[:100]}...")
+            logger.info(f"📝 Message from {author}: {content[:100]}...")
 
             # Send to Telegram
             if telegram_service.enabled:
                 try:
+                    logger.info(f"🔄 Attempting to send to Telegram: {author} - {content[:50]}...")
                     success = await telegram_service.send_raw_message(data)
                     if success:
-                        logger.info(f"✅ Message sent to Telegram")
+                        logger.info(f"✅ Message sent to Telegram successfully")
                     else:
                         logger.warning(f"❌ Failed to send message to Telegram")
                 except Exception as e:
-                    logger.error(f"Error sending message to Telegram: {e}")
+                    logger.error(f"💥 Error sending message to Telegram: {e}")
             else:
                 logger.warning("⚠️ Telegram is not enabled - message not sent")
 

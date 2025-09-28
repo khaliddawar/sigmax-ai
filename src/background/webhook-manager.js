@@ -58,12 +58,14 @@ class WebhookManager {
 
   async queueMessage(message) {
     try {
+      console.log('📦 Webhook Manager queueing message - Author:', message.author, 'Content:', message.content?.substring(0, 50));
+
       // Check queue size limit
       if (this.messageQueue.length >= WEBHOOK_CONFIG.MAX_QUEUE_SIZE) {
         logger.warn('Message queue full, removing oldest message');
         this.messageQueue.shift();
       }
-      
+
       // Add message to queue
       const queuedMessage = {
         ...message,
@@ -159,11 +161,13 @@ class WebhookManager {
     try {
       // Fix message format issues
       const fixedMessages = (Array.isArray(messages) ? messages : [messages]).map(msg => {
+        console.log('🚚 Webhook Manager - msg.author:', JSON.stringify(msg.author), 'Type:', typeof msg.author, 'Falsy?', !msg.author);
+
         // Ensure importance is an integer
         if (msg.intelligence && typeof msg.intelligence.importance === 'number') {
           msg.intelligence.importance = Math.round(msg.intelligence.importance);
         }
-        
+
         // Clean message - remove queue-specific fields
         return {
           id: msg.id,
@@ -178,8 +182,30 @@ class WebhookManager {
         };
       });
       
+      // Final transport filter: drop system messages if any slipped through
+      const transportFiltered = fixedMessages.filter((m) => {
+        try {
+          const platform = (m.platform || '').toLowerCase();
+          const author = (m.author || '').trim();
+          const content = (m.content || '').trim();
+          const normalized = content.replace(/^[^A-Za-z]+/, '');
+          
+          // Filter "Unknown in #channel" messages regardless of detected platform
+          if (author === 'Unknown' && /^(Unknown\s+in\s+#)/i.test(normalized)) {
+            logger.debug(`Filtered "Unknown in #..." message at transport layer (platform: ${platform})`);
+            return false;
+          }
+        } catch {}
+        return true;
+      });
+
+      if (transportFiltered.length === 0) {
+        logger.info('All messages filtered at transport; skipping webhook send');
+        return { success: true, status: 204, idempotencyKey: 'filtered' };
+      }
+
       const payload = {
-        messages: fixedMessages,
+        messages: transportFiltered,
         timestamp: new Date().toISOString(),
         source: {type: 'signalscope'},  // Changed to object
         version: chrome.runtime.getManifest().version

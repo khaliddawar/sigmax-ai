@@ -12,7 +12,8 @@
     "alarms",
     "sidePanel",
     "contextMenus",
-    "notifications"
+    "notifications",
+    "debugger"
   ],
   
   "host_permissions": [
@@ -47,7 +48,7 @@
         "http://127.0.0.1/*",
         "file:///*"
       ],
-      "js": ["content/content-script.js"],
+      "js": ["content/content-script-enhanced.js"],
       "run_at": "document_idle",
       "all_frames": false
     }
