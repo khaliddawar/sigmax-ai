@@ -119,3 +119,10 @@ coverage/
 *_DRAFT.md
 *_TEMP.md
 *_OLD.md
+
+# API Keys and Secrets
+mcp.json
+*_with_api_key.ps1
+update_api_key.ps1
+run_with_slack.py
+slack_commands_setup.py
