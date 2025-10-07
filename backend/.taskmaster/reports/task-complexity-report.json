@@ -1,0 +1,93 @@
+{
+	"meta": {
+		"generatedAt": "2025-07-28T18:50:38.789Z",
+		"tasksAnalyzed": 10,
+		"totalTasks": 33,
+		"analysisCount": 10,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 24,
+			"taskTitle": "Add Environment Variables for Dynamic Configuration",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down the environment variable implementation into: 1) Define and document all required environment variables with their defaults, 2) Implement the configuration loading mechanism with proper error handling, and 3) Update existing hardcoded values throughout the codebase to use the new configuration system.",
+			"reasoning": "Moderate complexity due to multiple environment variables and need for backward compatibility, but straightforward implementation pattern."
+		},
+		{
+			"taskId": 25,
+			"taskTitle": "Update Synthesis Token Limit Logic",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divide into: 1) Implement new token calculation formula with min/max constraints, 2) Update temperature parameter usage from environment variables, 3) Refactor existing token limit logic around line 923, and 4) Add validation and error handling for edge cases in token calculations.",
+			"reasoning": "Medium complexity due to mathematical logic changes and dependency on environment variables, with potential for edge cases in token calculations."
+		},
+		{
+			"taskId": 26,
+			"taskTitle": "Enhance Synthesis Prompt Generation",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break into: 1) Design and implement the prompt style system with environment variable support, 2) Create detailed prompt templates with comprehensive coverage requirements, 3) Refactor existing prompt generation logic (lines 850-920), and 4) Implement fallback mechanisms and validation for prompt styles.",
+			"reasoning": "Higher complexity due to significant changes to core prompt logic, multiple prompt styles, and need to maintain quality while changing fundamental behavior."
+		},
+		{
+			"taskId": 27,
+			"taskTitle": "Expand Content Extraction Window",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divide into: 1) Implement context expansion logic with configurable window size, 2) Add boundary condition handling for transcript start/end positions, and 3) Implement overlap detection and deduplication logic to prevent content duplication.",
+			"reasoning": "Medium complexity due to boundary condition handling and potential for content overlap issues, but relatively contained scope."
+		},
+		{
+			"taskId": 28,
+			"taskTitle": "Implement Section Batching System",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break into: 1) Design batch creation and sizing logic, 2) Implement individual batch processing methods, 3) Create batch summary merging functionality, 4) Implement chronological flow preservation, 5) Add batch overlap handling to prevent content gaps, and 6) Create toggle mechanism between batched and non-batched processing.",
+			"reasoning": "High complexity due to new architectural pattern, multiple interdependent components, chronological flow requirements, and potential for data loss if not implemented correctly."
+		},
+		{
+			"taskId": 29,
+			"taskTitle": "Configure Batch Processing Parameters",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divide into: 1) Implement batch configuration environment variables and loading, 2) Create batch continuity logic to prevent content gaps, 3) Implement timeline flow preservation mechanisms, and 4) Add validation and error handling for batch configuration edge cases.",
+			"reasoning": "Medium-high complexity due to dependency on complex batching system and need to ensure data integrity across batch boundaries."
+		},
+		{
+			"taskId": 30,
+			"taskTitle": "Integrate Semantic Chunks into Content Extraction",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break into: 1) Implement database adapter integration for semantic chunk retrieval, 2) Create chunk-to-section mapping and combination logic, 3) Add environment flag for semantic chunk usage, 4) Implement fallback mechanisms when chunks are unavailable, and 5) Add performance optimization for chunk-based extraction.",
+			"reasoning": "High complexity due to database integration, new data processing pipeline, and need to maintain compatibility with existing text-based extraction."
+		},
+		{
+			"taskId": 31,
+			"taskTitle": "Update Ingestion Pipeline for Transcript ID Passing",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divide into: 1) Update method signatures throughout the pipeline to include transcript_id parameter, 2) Modify router endpoints and calling methods to pass transcript_id, and 3) Implement backward compatibility handling for methods called without transcript_id.",
+			"reasoning": "Moderate complexity due to multiple method signature changes across the codebase, but straightforward parameter passing pattern."
+		},
+		{
+			"taskId": 32,
+			"taskTitle": "Implement Comprehensive Testing Suite",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break into: 1) Create unit tests for configuration and token calculation logic, 2) Implement integration tests with various transcript lengths, 3) Build A/B testing framework for batched vs non-batched processing, 4) Create performance benchmark tests with P95 time constraints, and 5) Implement test data generation and management for various transcript scenarios.",
+			"reasoning": "High complexity due to comprehensive test coverage requirements, performance testing needs, and A/B testing framework implementation."
+		},
+		{
+			"taskId": 33,
+			"taskTitle": "Implement Monitoring and Rollback Mechanisms",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break into: 1) Design and implement metrics collection system for summary quality and performance, 2) Create feature flag system for gradual rollout and emergency rollback, 3) Implement alerting system with configurable thresholds, 4) Build monitoring dashboard for real-time metrics visualization, 5) Create automated rollback triggers based on performance degradation, and 6) Implement comprehensive logging for debugging and analysis.",
+			"reasoning": "High complexity due to comprehensive monitoring requirements, multiple interconnected systems, real-time alerting needs, and critical rollback functionality for production safety."
+		}
+	]
+}

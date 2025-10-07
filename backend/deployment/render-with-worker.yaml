@@ -1,0 +1,170 @@
+services:
+  - type: web
+    name: simply-backend
+    runtime: docker
+    plan: starter
+    region: oregon
+    branch: master
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SERVICE_TYPE
+        value: backend
+      - key: PYTHONPATH
+        value: /app
+      - key: LOG_LEVEL
+        value: INFO
+      - key: SUPABASE_URL
+        fromDatabase:
+          name: simply-secrets
+          property: SUPABASE_URL
+      - key: SUPABASE_ANON_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: SUPABASE_ANON_KEY
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: SUPABASE_SERVICE_ROLE_KEY
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: simply-redis
+          property: connectionString
+      - key: ANTHROPIC_API_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: ANTHROPIC_API_KEY
+      - key: OPENAI_API_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: OPENAI_API_KEY
+      - key: PERPLEXITY_API_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: PERPLEXITY_API_KEY
+      - key: POSTMARK_API_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: POSTMARK_API_KEY
+      - key: POSTMARK_FROM_EMAIL
+        fromDatabase:
+          name: simply-secrets
+          property: POSTMARK_FROM_EMAIL
+      # SMTP Email Configuration for EmailService
+      - key: SMTP_SERVER
+        fromDatabase:
+          name: simply-secrets
+          property: SMTP_SERVER
+      - key: SMTP_PORT
+        fromDatabase:
+          name: simply-secrets
+          property: SMTP_PORT
+      - key: SMTP_USERNAME
+        fromDatabase:
+          name: simply-secrets
+          property: SMTP_USERNAME
+      - key: SMTP_PASSWORD
+        fromDatabase:
+          name: simply-secrets
+          property: SMTP_PASSWORD
+      - key: SENDER_EMAIL
+        fromDatabase:
+          name: simply-secrets
+          property: SENDER_EMAIL
+      - key: ADMIN_EMAIL
+        fromDatabase:
+          name: simply-secrets
+          property: ADMIN_EMAIL
+    healthCheckPath: /health
+    autoDeploy: true
+
+  # 🔧 OPTIMIZED: Worker service following Render best practices
+  - type: worker
+    name: simply-worker
+    runtime: docker
+    plan: starter  # ⬆️ UPGRADE: 1GB instead of 500MB Basic
+    region: oregon
+    branch: master
+    dockerfilePath: ./Dockerfile
+    # 🆕 Render + Celery optimization best practices
+    startCommand: celery worker --app app.services.queue_service:celery_app --loglevel info --queues high,normal --concurrency 1 --max-memory-per-child 400000 --max-tasks-per-child 10 --prefetch-multiplier 1 --pool prefork
+    envVars:
+      - key: SERVICE_TYPE
+        value: worker
+      - key: PYTHONPATH
+        value: /app
+      - key: LOG_LEVEL
+        value: INFO
+      # 🆕 Memory optimization based on external research
+      - key: CELERY_WORKER_MAX_MEMORY_PER_CHILD
+        value: 400000  # 400MB per child (Render best practice)
+      - key: CELERY_WORKER_MAX_TASKS_PER_CHILD  
+        value: 10       # Reset worker after 10 tasks
+      - key: CELERY_WORKER_PREFETCH_MULTIPLIER
+        value: 1        # Process one task at a time
+      - key: CELERY_WORKER_DISABLE_RATE_LIMITS
+        value: false
+      # 🆕 Worker-to-Backend fallback communication
+      - key: BACKEND_FALLBACK_URL
+        value: https://simply-firy.onrender.com  # Internal backend URL for fallback
+      - key: SERVICE_TO_SERVICE_TOKEN
+        fromDatabase:
+          name: simply-secrets
+          property: SERVICE_TO_SERVICE_TOKEN
+      # CRITICAL: Celery broker configuration
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: simply-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: simply-redis
+          property: connectionString
+      # Database and AI API access
+      - key: SUPABASE_URL
+        fromDatabase:
+          name: simply-secrets
+          property: SUPABASE_URL
+      - key: SUPABASE_ANON_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: SUPABASE_ANON_KEY
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: SUPABASE_SERVICE_ROLE_KEY
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: simply-redis
+          property: connectionString
+      - key: ANTHROPIC_API_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: ANTHROPIC_API_KEY
+      - key: OPENAI_API_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: OPENAI_API_KEY
+      - key: PERPLEXITY_API_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: PERPLEXITY_API_KEY
+    autoDeploy: true
+
+    overrides:
+      nginx:
+        client_max_body_size: 5m
+
+  - type: redis
+    name: simply-redis
+    plan: starter
+    region: oregon
+    ipAllowList: []
+
+databases:
+  - name: simply-secrets
+    databaseName: simply_env_vars
+    user: simply_admin 

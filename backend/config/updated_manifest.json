@@ -1,0 +1,44 @@
+{
+  "display_information": {
+    "name": "BPT Session Companion",
+    "description": "Ask questions about your trading meeting transcripts"
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "BPT Session Companion",
+      "always_online": false
+    },
+    "slash_commands": [
+      {
+        "command": "/ask-bpt",
+        "description": "Ask a question about meeting transcripts",
+        "usage_hint": "[your question about the meeting]",
+        "should_escape": true
+      },
+      {
+        "command": "/ask-bpt-help",
+        "description": "Get help with using the BPT bot",
+        "should_escape": true
+      }
+    ]
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "chat:write.public",
+        "chat:write",
+        "app_mentions:read",
+        "commands",
+        "im:history"
+      ]
+    }
+  },
+  "settings": {
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": true,
+    "token_rotation_enabled": false,
+    "interactivity": {
+      "is_enabled": true
+    }
+  }
+} 

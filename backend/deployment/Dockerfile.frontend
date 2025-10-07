@@ -1,0 +1,51 @@
+# Dockerfile for BPT Streamlit Frontend
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements for frontend
+COPY requirements.txt ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Download NLTK data
+RUN python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('stopwords')"
+
+# Copy frontend-specific directories and files - RESTRUCTURED for correct imports
+COPY app/web/ ./
+COPY utils/ ./utils/
+COPY configuration/ ./configuration/
+COPY config/ ./config/
+COPY scripts/ ./scripts/
+COPY start.py ./
+COPY start_frontend.sh ./
+
+# Debug: List contents to verify copy worked
+RUN echo "=== Debugging file structure ===" && \
+    pwd && \
+    ls -la && \
+    echo "=== app/web contents ===" && \
+    ls -la app/web/ || echo "app/web directory not found" && \
+    echo "=== End debug ==="
+
+# Set environment variables for frontend  
+ENV SERVICE_TYPE=frontend
+ENV PORT=8080
+
+# Expose the port
+EXPOSE 8080
+
+# Make the startup scripts executable
+RUN chmod +x start_frontend.sh
+RUN chmod +x start.py
+
+# Default command (Railway will override with ./start_frontend.sh)
+CMD ["./start_frontend.sh"]

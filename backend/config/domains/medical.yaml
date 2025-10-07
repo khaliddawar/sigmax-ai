@@ -1,0 +1,126 @@
+# Medical Domain Configuration
+# This file contains domain-specific settings for medical transcript analysis
+
+domain_name: "medical"
+description: "Configuration for medical consultation and research transcripts"
+
+# Entity types specific to medical domain
+entity_types:
+  - "PERSON"         # Patient names, doctor names
+  - "ORG"           # Hospitals, clinics, pharmaceutical companies
+  - "PRODUCT"       # Medications, medical devices
+  - "DATE"          # Appointment dates, symptom onset
+  - "CARDINAL"      # Dosages, measurements
+  - "PERCENT"       # Success rates, statistics
+
+# Medical terminology and concepts
+medical_concepts:
+  conditions:
+    - "diabetes"
+    - "hypertension"
+    - "cardiovascular disease"
+    - "cancer"
+    - "infection"
+    - "inflammation"
+    - "chronic pain"
+    - "depression"
+    - "anxiety"
+  
+  treatments:
+    - "medication"
+    - "surgery"
+    - "therapy"
+    - "rehabilitation"
+    - "chemotherapy"
+    - "radiation"
+    - "immunotherapy"
+    - "physical therapy"
+  
+  symptoms:
+    - "pain"
+    - "fever"
+    - "nausea"
+    - "fatigue"
+    - "shortness of breath"
+    - "headache"
+    - "dizziness"
+    - "swelling"
+
+# Sentiment indicators for medical analysis
+sentiment_indicators:
+  positive:
+    primary:
+      - "improvement"
+      - "recovery"
+      - "healing"
+      - "better"
+      - "effective"
+      - "successful"
+    
+    secondary:
+      - "stable"
+      - "responding well"
+      - "good prognosis"
+      - "reduced symptoms"
+      - "normal range"
+  
+  negative:
+    primary:
+      - "deterioration"
+      - "worsening"
+      - "complications"
+      - "adverse"
+      - "severe"
+      - "critical"
+    
+    secondary:
+      - "concerning"
+      - "elevated"
+      - "abnormal"
+      - "poor response"
+      - "side effects"
+  
+  neutral:
+    - "stable"
+    - "monitoring"
+    - "observation"
+    - "routine"
+    - "follow-up"
+
+# Topic classification rules
+topic_classification:
+  boundary_indicators:
+    - "next patient"
+    - "moving to"
+    - "regarding the"
+    - "concerning"
+    - "as for the"
+  
+  confidence_threshold: 0.7
+  max_topics: 10
+
+# Chunking parameters for medical content
+chunking:
+  target_size: 300
+  overlap: 40
+  
+  preserve_boundaries:
+    - "patient history"
+    - "treatment plan"
+    - "medication dosage"
+    - "vital signs"
+
+# Validation rules for medical responses
+validation:
+  required_elements:
+    - "condition_mention"
+    - "assessment"
+  
+  preferred_elements:
+    - "treatment_plan"
+    - "prognosis"
+    - "follow_up"
+  
+  quality_checks:
+    min_specificity: 0.7
+    max_ambiguity: 0.2 

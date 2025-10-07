@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<!-- Template updated with Professional Dark Blue color scheme - v2.5 -->
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ session_title }} - Quick-Sheet</title>
+  <style>
+    body { 
+      font-family: Arial, Helvetica, sans-serif; /* Simplified for email compatibility */
+      line-height: 1.6; 
+      color: #333; 
+      max-width: 700px; 
+      margin: 0 auto; 
+      background-color: #fafafa;
+    }
+    .container {
+      background-color: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(30, 64, 175, 0.1);
+      margin: 20px auto;
+    }
+    .header { 
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+      background-color: #1e40af;
+      color: white;
+      padding: 25px; 
+    }
+    .header h1 {
+      margin: 0 0 5px 0;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: white !important; /* Force white color for email clients */
+    }
+    .header p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.9;
+      color: white !important; /* Force white color for email clients */
+    }
+    .content {
+      padding: 25px;
+    }
+    
+    /* Enhanced styles for rich summary content */
+    .summary h3 {
+      color: #1e40af !important;
+      font-size: 16px !important;
+      margin: 15px 0 10px 0 !important;
+      font-weight: 600 !important;
+      border-bottom: 1px solid #e5e7eb !important;
+      padding-bottom: 5px !important;
+    }
+    .summary p {
+      margin: 10px 0 !important;
+      line-height: 1.6 !important;
+      color: #333 !important;
+    }
+    .summary p.content-insight {
+      background: #fff !important;
+      padding: 15px !important;
+      border-radius: 5px !important;
+      box-shadow: 0 2px 5px rgba(30,64,175,0.1) !important;
+      margin-bottom: 15px !important;
+      border-left: 3px solid #1e40af !important;
+    }
+    .summary ul {
+      margin: 10px 0 !important;
+      padding-left: 20px !important;
+    }
+    .summary li {
+      margin-bottom: 5px !important;
+      line-height: 1.6 !important;
+    }
+    .summary strong {
+      color: #1e40af !important;
+      font-weight: 600 !important;
+    }
+    
+    /* Styles for pre-formatted HTML summary */
+    h2.section-heading {
+      font-family: Arial, Helvetica, sans-serif; /* Simplified for email compatibility */
+      font-weight: 600;
+      font-size: 18px;
+      color: #1e40af;
+      margin: 15px 0 8px 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e5e7eb;
+      display: inline-block;
+      position: relative;
+    }
+    h2.section-heading::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 40%;
+      height: 2px;
+      background: linear-gradient(90deg, #1e40af 0%, rgba(30, 64, 175, 0.2) 100%);
+    }
+    
+    /* Summary section styles */
+    .summary { 
+      margin-bottom: 20px;
+    }
+    .summary ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .summary li {
+      margin-bottom: 8px;
+      text-align: justify;
+    }
+    
+    /* Beautiful content insight paragraph styling */
+    .content-insight {
+      margin: 0 0 18px 0;
+      padding: 16px 20px;
+      line-height: 1.7;
+      text-align: justify;
+      background: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
+      border-left: 2px solid #1e40af;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(30, 64, 175, 0.1);
+      font-size: 14px;
+      color: #374151;
+    }
+    
+    .content-insight strong {
+      color: #1e40af;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    
+    /* First heading should have less top margin */
+    .summary h3:first-child {
+      margin-top: 0;
+    }
+    
+    /* Legacy bullet styling for other content */
+    ul {
+      margin: 0 0 15px 18px;
+      padding: 0;
+    }
+    li {
+      margin: 4px 0;
+      line-height: 1.5;
+    }
+    
+    .summary li.details {
+      color: #6b7280;
+      font-size: 13px;
+      margin-left: 15px;
+    }
+    .summary strong {
+      font-weight: 600;
+      color: #1f2937;
+    }
+    
+    /* CTA SECTION STYLES */
+    .cta-section {
+      text-align: center;
+      margin: 2.5em 0;
+      padding: 2em 0;
+      border-top: 1px solid #e5e7eb;
+      border-bottom: 1px solid #e5e7eb;
+      background: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
+      border-left: 2px solid #1e40af;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(30, 64, 175, 0.1);
+    }
+    
+    .cta-button {
+      background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+      background-color: #1e40af !important; /* Fallback for email clients */
+      color: #ffffff !important;
+      padding: 1em 2.5em;
+      border-radius: 8px;
+      text-decoration: none !important;
+      font-weight: 600;
+      font-size: 1.1em;
+      display: inline-block;
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+      border: none;
+      mso-padding-alt: 16px 40px; /* Outlook support */
+    }
+    
+    .cta-button:hover {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+      box-shadow: 0 6px 16px rgba(30, 64, 175, 0.4);
+    }
+    
+    .cta-header {
+      margin-bottom: 1em;
+    }
+    
+    .cta-emoji {
+      font-size: 1.5em;
+      margin-bottom: 0.5em;
+    }
+    
+    .cta-title {
+      margin: 0;
+      color: #1e40af;
+      font-size: 1.2em;
+      font-weight: 600;
+      line-height: 1.7;
+    }
+    
+    .cta-description {
+      margin-top: 1em;
+      color: #374151;
+      font-size: 0.95em;
+      font-style: italic;
+      line-height: 1.7;
+      padding: 0 1em;
+    }
+    
+
+    
+    /* Footer */
+    .footer { 
+      background-color: #fafafa;
+      padding: 15px 25px; 
+      font-size: 12px; 
+      color: #6b7280; 
+      text-align: center;
+      border-top: 1px solid #e5e7eb;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 640px) {
+      .header {
+        padding: 20px;
+      }
+      .content {
+        padding: 20px;
+      }
+      .footer {
+        padding: 15px 20px;
+      }
+      .cta-button {
+        padding: 0.8em 2em;
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header" style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); background-color: #1e40af; color: white; padding: 25px;">
+      <h1 style="margin: 0 0 15px 0; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: white !important;">{{ session_title }}</h1>
+      
+      <div style="font-size: 14px; line-height: 1.6; margin-top: 15px;">
+        {% if channel_name %}
+        <div style="margin-bottom: 8px;">
+          <strong style="color: #ffffff;">Channel:</strong> 
+          <span style="color: #e2e8f0;">{{ channel_name }}</span>
+        </div>
+        {% endif %}
+        {% if duration_formatted %}
+        <div style="margin-bottom: 8px;">
+          <strong style="color: #ffffff;">Duration:</strong> 
+          <span style="color: #e2e8f0;">{{ duration_formatted }}</span>
+        </div>
+        {% endif %}
+        {% if transcript_length %}
+        <div style="margin-bottom: 0;">
+          <strong style="color: #ffffff;">Transcript Length:</strong> 
+          <span style="color: #e2e8f0;">{{ transcript_length }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="content">
+      <div class="summary">
+        <h3 style="color: #1e40af; font-size: 18px; margin-bottom: 15px; font-weight: 600;">Session Summary</h3>
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          {{ summary|safe }}
+        </div>
+      </div>
+      
+      <!-- Interactive Q&A Call-to-Action Section -->
+      {% if transcript_id %}
+      <div class="cta-section">
+        <div class="cta-header">
+          <div class="cta-emoji">🤖</div>
+          <h4 class="cta-title">Want to dive deeper into this session?</h4>
+        </div>
+        <a href="https://bptf.up.railway.app/?transcript={{ transcript_id }}" class="cta-button" style="background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); background-color: #1e40af !important; color: #ffffff !important; padding: 1em 2.5em; border-radius: 8px; text-decoration: none !important; font-weight: 600; font-size: 1.1em; display: inline-block; box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3); border: none;">
+          Ask Questions About This Session
+        </a>
+        <p class="cta-description">
+          Try our new AI-powered Q&A tool to explore insights, clarify strategies, and get personalized answers about today's discussion!
+        </p>
+      </div>
+      {% endif %}
+      
+      {% if action_items %}
+      <div class="action-items">
+        <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 12px; font-weight: 600;">Action Items</h3>
+        <ul style="margin: 0 0 15px 18px; padding: 0;">
+          {% for item in action_items %}
+          <li style="margin: 4px 0; line-height: 1.5;">{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      
+      {% if trades %}
+      <div class="trades">
+        <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 12px; font-weight: 600;">Trades Discussed</h3>
+        <table style="width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px;">
+          <thead>
+            <tr>
+              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb; background-color: #f3f4f6; font-weight: 600;">Ticker</th>
+              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb; background-color: #f3f4f6; font-weight: 600;">Direction</th>
+              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb; background-color: #f3f4f6; font-weight: 600;">Entry</th>
+              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb; background-color: #f3f4f6; font-weight: 600;">Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for trade in trades %}
+            <tr>
+              <td style="padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb;">{{ trade.ticker or '-' }}</td>
+              <td style="padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb;">{{ trade.direction or '-' }}</td>
+              <td style="padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb;">{{ trade.entry_price or '-' }}</td>
+              <td style="padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb;">{{ trade.notes or '-' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+    
+    <div class="footer">
+      <p>Generated by TubeVibe Transcription and Analysis System on {{ session_date }}</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-ada-002}
+      - QA_MODEL=${QA_MODEL:-gpt-4o-mini}
+      - SUPABASE_URL=${SUPABASE_URL:-}
+      - SUPABASE_KEY=${SUPABASE_KEY:-}
+      - FIREFLIES_WEBHOOK_SECRET=${FIREFLIES_WEBHOOK_SECRET:-test_webhook_secret}
+      - FIREFLIES_API_KEY=${FIREFLIES_API_KEY:-}
+      - WEBHOOK_VERIFY_SIGNATURES=${WEBHOOK_VERIFY_SIGNATURES:-false}
+      - DEBUG=${DEBUG:-False}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    depends_on:
+      - http-server
+  
+  http-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python simple_http_server.py
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080" 

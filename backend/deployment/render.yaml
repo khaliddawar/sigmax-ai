@@ -1,0 +1,90 @@
+services:
+  - type: web
+    name: simply-backend
+    runtime: docker
+    plan: starter
+    region: oregon
+    branch: master
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SERVICE_TYPE
+        value: backend
+      - key: PYTHONPATH
+        value: /app
+      - key: LOG_LEVEL
+        value: INFO
+      - key: SUPABASE_URL
+        fromDatabase:
+          name: simply-secrets
+          property: SUPABASE_URL
+      - key: SUPABASE_ANON_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: SUPABASE_ANON_KEY
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: SUPABASE_SERVICE_ROLE_KEY
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: simply-redis
+          property: connectionString
+      - key: ANTHROPIC_API_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: ANTHROPIC_API_KEY
+      - key: OPENAI_API_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: OPENAI_API_KEY
+      - key: PERPLEXITY_API_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: PERPLEXITY_API_KEY
+      - key: POSTMARK_API_KEY
+        fromDatabase:
+          name: simply-secrets
+          property: POSTMARK_API_KEY
+      - key: POSTMARK_FROM_EMAIL
+        fromDatabase:
+          name: simply-secrets
+          property: POSTMARK_FROM_EMAIL
+      # SMTP Email Configuration for EmailService
+      - key: SMTP_SERVER
+        fromDatabase:
+          name: simply-secrets
+          property: SMTP_SERVER
+      - key: SMTP_PORT
+        fromDatabase:
+          name: simply-secrets
+          property: SMTP_PORT
+      - key: SMTP_USERNAME
+        fromDatabase:
+          name: simply-secrets
+          property: SMTP_USERNAME
+      - key: SMTP_PASSWORD
+        fromDatabase:
+          name: simply-secrets
+          property: SMTP_PASSWORD
+      - key: SENDER_EMAIL
+        fromDatabase:
+          name: simply-secrets
+          property: SENDER_EMAIL
+      - key: ADMIN_EMAIL
+        fromDatabase:
+          name: simply-secrets
+          property: ADMIN_EMAIL
+    healthCheckPath: /health
+    autoDeploy: true
+
+  - type: redis
+    name: simply-redis
+    plan: starter
+    region: oregon
+    ipAllowList: []
+
+databases:
+  - name: simply-secrets
+    databaseName: simply_env_vars
+    user: simply_admin 

@@ -1,0 +1,84 @@
+# Summary Enhancement Implementation PRD
+
+## Project Overview
+Fix oversummarization issues in long transcripts (>45 minutes) by enhancing the current summary_service_v2.py implementation.
+
+## Problem Statement
+Users report that long transcripts suffer from:
+- Shallow, executive-only summaries
+- Missing late sections (everything after ~30 mins gets dropped)
+- Overly compressed content due to 4000 token hard cap
+- Low temperature (0.1) encouraging extreme compression
+- Synthesis prompt asking for "brief summary" and "Quality over quantity"
+
+## Technical Context
+The active summary_service_v2.py uses a 5-stage AI pipeline:
+1. Content flow analysis
+2. Dynamic section discovery
+3. Context-aware content extraction
+4. Synthesis with max_tokens=min(4000, total_content_length * 2)
+5. Action item extraction
+
+## Requirements
+
+### Phase 1: Immediate Fixes (Week 1)
+1. Add environment variables for dynamic configuration
+   - SUMMARY_MAX_TOKENS=8000 (increase from 4000)
+   - SUMMARY_TEMPERATURE=0.35 (increase from 0.1)
+   - SUMMARY_MIN_TOKENS=2000
+   - SYNTHESIS_PROMPT_STYLE=detailed
+
+2. Update synthesis token limit logic (Line ~923)
+   - Replace hardcoded values with environment variables
+   - Increase multiplier from 2x to 3x content length
+   - Add minimum token threshold
+
+3. Enhance synthesis prompt generation (Line ~850-920)
+   - Add "detailed" prompt style option
+   - Replace "brief summary" instructions with comprehensive coverage
+   - Add specific instructions for including examples and quotes
+
+4. Expand content extraction window (Line ~497)
+   - Add SECTION_CONTEXT_EXPANSION configuration
+   - Increase context around each section by 500 chars
+
+### Phase 2: Enhanced Section Processing (Week 2)
+1. Implement section batching system
+   - Add ENABLE_SECTION_BATCHING flag
+   - Process sections in batches of 5
+   - Create _synthesize_comprehensive_summary_batched method
+   - Add _merge_batch_summaries method for final synthesis
+
+2. Configure batch processing
+   - SECTION_BATCH_SIZE=5 environment variable
+   - Ensure no content is lost between batches
+   - Maintain timeline flow across batches
+
+### Phase 3: Semantic Chunk Integration (Week 3)
+1. Integrate semantic chunks into content extraction
+   - Add USE_SEMANTIC_CHUNKS flag
+   - Import SupabaseAdapter in summary_service_v2.py
+   - Enhance _extract_section_content to use semantic chunks
+   - Pass transcript_id through the pipeline
+
+2. Update ingestion pipeline
+   - Ensure transcript_id is passed to generate_summary
+   - Update router methods to pass transcript_id
+
+## Success Metrics
+- Coverage: Average summary length increases by 80%+ for 1hr+ videos
+- Completeness: User complaints about missing sections drop to 0
+- Quality: No increase in hallucination reports
+- Performance: P95 generation time remains under 20 seconds
+
+## Risk Mitigation
+- All changes behind environment variables for easy rollback
+- Gradual rollout starting with Phase 1
+- Monitor token costs closely
+- Keep validation framework active
+
+## Testing Requirements
+- Unit tests for token limit configurations
+- Integration tests with 45min and 2hr transcripts
+- A/B testing for batched vs non-batched processing
+- Performance benchmarks for semantic chunk integration 

@@ -1,0 +1,203 @@
+# Validation Prompts for Dynamic Section Generation Quality Assurance
+# Used by EnhancedPromptEngine to validate and improve generated sections and content
+
+validation_prompts:
+  section_validation:
+    section_quality_assessment: |
+      You are a quality validator for dynamically generated financial discussion sections.
+      
+      Evaluate each generated section against these critical criteria:
+      
+      **SECTION NAME QUALITY:**
+      1. **Specificity**: Does the name reflect actual content discussed (not generic)?
+      2. **Descriptiveness**: Are key topics/assets mentioned in the name?
+      3. **Timeline Accuracy**: Do time ranges match the actual content timespan?
+      4. **Natural Flow**: Does the name sound like a natural discussion topic?
+      5. **Uniqueness**: Is each section name distinct from others?
+      
+      **CONTENT COVERAGE:**
+      1. **Completeness**: All important information within timeframe captured?
+      2. **Coherence**: Does content form a cohesive discussion theme?
+      3. **Temporal Boundaries**: Content doesn't leak into adjacent sections?
+      4. **Information Density**: Sufficient substantive content to warrant section?
+      
+      **FINANCIAL ACCURACY & ANTI-HALLUCINATION:**
+      1. **Number Preservation**: All exact figures, targets, levels maintained?
+      2. **Source Verification**: All financial data comes from original transcript only?
+      3. **No Fabrication**: Zero invented numbers, prices, or market levels?
+      4. **Asset Specificity**: Stock symbols, commodities correctly identified from source?
+      5. **Context Accuracy**: Market insights and reasoning preserved from original?
+      6. **Actionability**: Clear takeaways based only on discussed content?
+      
+    section_improvement_recommendations: |
+      For sections that don't meet quality standards, provide specific improvements:
+      
+      **Section Name Improvements:**
+      - Replace generic terms with specific topics discussed
+      - Add key asset names or market themes
+      - Adjust time boundaries to match content flow
+      - Use more descriptive and engaging language
+      
+      **Content Improvements:**
+      - Fill information gaps or missing details
+      - Improve narrative flow and transitions
+      - Add missing context or explanations
+      - Enhance actionability of insights
+      
+      **Structural Improvements:**
+      - Merge overly fragmented sections
+      - Split sections that cover too many disparate topics
+      - Adjust temporal boundaries for better coherence
+      - Reorder sections for logical progression
+
+  content_validation:
+    information_accuracy_check: |
+      Validate synthesized content for accuracy and completeness:
+      
+      **NUMERICAL ACCURACY:**
+      - Verify all price targets, levels, percentages match source
+      - Check dates, timeframes, and temporal references
+      - Confirm calculations and relative comparisons
+      - Validate currency conversions or index relationships
+      
+      **CONTEXTUAL FIDELITY:**
+      - Ensure market reasoning and logic preserved
+      - Verify cause-and-effect relationships maintained
+      - Check that speaker intent and emphasis captured
+      - Confirm risk factors and warnings included
+      
+      **COMPLETENESS VERIFICATION:**
+      - All mentioned assets and sectors covered
+      - No significant insights or recommendations omitted
+      - Action items and next steps preserved
+      - Follow-up questions or clarifications included
+      
+    content_enhancement_validation: |
+      Assess whether content enhancements maintain accuracy:
+      
+      **ADDED CONTEXT VERIFICATION:**
+      - Does additional context align with original discussion?
+      - Are explanations consistent with speaker expertise?
+      - Do clarifications improve understanding without distortion?
+      
+      **FORMATTING CONSISTENCY:**
+      - Consistent use of bold/italics for emphasis
+      - Proper bullet point and numbering structure
+      - Clear paragraph breaks and section organization
+      - Appropriate use of financial terminology
+      
+      **READABILITY ASSESSMENT:**
+      - Content flows naturally and logically
+      - Technical concepts explained appropriately
+      - Transitions between ideas are smooth
+      - Summary maintains professional tone
+
+  overall_summary_validation:
+    structural_coherence: |
+      Evaluate the overall summary structure:
+      
+      **SECTION FLOW:**
+      1. **Logical Progression**: Sections follow natural discussion order
+      2. **Thematic Coherence**: Related topics grouped appropriately
+      3. **Temporal Consistency**: Timeline progression makes sense
+      4. **Content Balance**: Appropriate detail level across sections
+      
+      **CROSS-SECTION INTEGRATION:**
+      1. **Reference Consistency**: Cross-references between sections accurate
+      2. **Terminology Alignment**: Consistent use of terms and concepts
+      3. **Narrative Continuity**: Story flows coherently across sections
+      4. **Conclusion Integration**: Key themes tied together effectively
+      
+    backward_compatibility_check: |
+      Ensure new dynamic sections maintain system compatibility:
+      
+      **DATABASE COMPATIBILITY:**
+      - Generated format fits existing storage structure
+      - Field requirements and constraints satisfied
+      - Character limits and encoding handled properly
+      
+      **API COMPATIBILITY:**
+      - Return format matches expected structure
+      - Required fields and metadata present
+      - Error handling scenarios covered
+      
+      **QA SYSTEM COMPATIBILITY:**
+      - Content structure supports semantic chunking
+      - Section boundaries preserve context for RAG
+      - Enhanced summaries improve question answering
+      
+    quality_metrics:
+      quantitative_assessments: |
+        Measure summary quality with specific metrics:
+        
+        **INFORMATION DENSITY:**
+        - Specific data points per section (target: 5-10 per section)
+        - Actionable insights ratio (target: 70%+ actionable content)
+        - Number precision (target: 100% exact number preservation)
+        
+        **STRUCTURAL QUALITY:**
+        - Average section length (target: 3-8 minutes content per section)
+        - Section name specificity score (1-10, target: 8+)
+        - Cross-section reference accuracy (target: 95%+)
+        
+        **USER VALUE METRICS:**
+        - Key insight extraction completeness (target: 95%+)
+        - Timeline accuracy (target: 100% temporal correctness)
+        - Professional readability score (target: 8+/10)
+        
+      qualitative_assessments: |
+        Evaluate subjective quality factors:
+        
+        **PROFESSIONAL POLISH:**
+        - Natural language flow and readability
+        - Appropriate financial terminology usage
+        - Professional tone and presentation
+        - Engaging but informative section names
+        
+        **PRACTICAL UTILITY:**
+        - Actionable insights clearly highlighted
+        - Risk factors appropriately emphasized
+        - Timeline guidance useful for planning
+        - Decision-making support quality
+        
+        **INNOVATION OVER BASELINE:**
+        - Significant improvement over bucketing approach
+        - Natural section discovery vs. rigid categorization
+        - Enhanced detail and context vs. template output
+        - Better narrative flow vs. fragmented summaries
+
+  error_detection:
+    common_failure_patterns: |
+      Watch for these common issues in dynamic section generation:
+      
+      **SECTION GENERATION FAILURES:**
+      - Reverting to generic bucket names
+      - Creating too many micro-sections (< 2 minutes each)
+      - Missing obvious topic transitions
+      - Inconsistent time boundary detection
+      
+      **CONTENT SYNTHESIS FAILURES:**
+      - Number hallucination or modification
+      - Lost context from original discussion
+      - Over-summarization losing critical details
+      - Mixing content from different time periods
+      
+      **STRUCTURAL FAILURES:**
+      - Sections that don't align with content boundaries
+      - Duplicate content across multiple sections
+      - Missing transitions between major topics
+      - Temporal discontinuities in section flow
+      
+    recovery_strategies: |
+      When errors are detected, apply these recovery approaches:
+      
+      **REGENERATION TRIGGERS:**
+      - If section names are too generic, regenerate with more specific prompts
+      - If content accuracy is compromised, re-extract with stricter guidelines
+      - If structure is incoherent, re-analyze transcript for better boundaries
+      
+      **FALLBACK PROCEDURES:**
+      - Maintain compatibility with existing bucketing as backup
+      - Preserve original transcript if dynamic generation fails
+      - Log errors for continuous improvement of prompts and logic
+      - Ensure graceful degradation maintains system functionality 

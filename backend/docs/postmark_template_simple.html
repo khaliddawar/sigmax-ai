@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{session_title}} - TubeVibe Summary</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 700px; margin: 0 auto; background-color: #fafafa;">
+  
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; margin: 20px auto;">
+    
+    <!-- Header -->
+    <tr>
+      <td style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); background-color: #1e40af; color: white; padding: 25px;">
+        <h1 style="margin: 0 0 15px 0; font-size: 22px; font-weight: 600; color: white;">{{session_title}}</h1>
+        
+        {{#channel_name}}
+        <div style="margin-bottom: 8px; font-size: 14px;">
+          <strong style="color: #ffffff;">Channel:</strong> 
+          <span style="color: #e2e8f0;">{{channel_name}}</span>
+        </div>
+        {{/channel_name}}
+        
+        {{#duration_formatted}}
+        <div style="margin-bottom: 8px; font-size: 14px;">
+          <strong style="color: #ffffff;">Duration:</strong> 
+          <span style="color: #e2e8f0;">{{duration_formatted}}</span>
+        </div>
+        {{/duration_formatted}}
+        
+        {{#transcript_length}}
+        <div style="margin-bottom: 0; font-size: 14px;">
+          <strong style="color: #ffffff;">Transcript Length:</strong> 
+          <span style="color: #e2e8f0;">{{transcript_length}}</span>
+        </div>
+        {{/transcript_length}}
+      </td>
+    </tr>
+    
+    <!-- Content -->
+    <tr>
+      <td style="padding: 25px;">
+        
+        <!-- Summary Section -->
+        <h3 style="color: #1e40af; font-size: 18px; margin-bottom: 15px; font-weight: 600; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;">Session Summary</h3>
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin-bottom: 25px;">
+          {{{summary}}}
+        </div>
+        
+        <!-- CTA Section -->
+        {{#transcript_id}}
+        <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%); border-left: 2px solid #1e40af; border-radius: 6px; margin: 25px 0; padding: 20px;">
+          <tr>
+            <td style="text-align: center;">
+              <div style="font-size: 24px; margin-bottom: 10px;">🤖</div>
+              <h4 style="margin: 0 0 15px 0; color: #1e40af; font-size: 18px; font-weight: 600;">Want to dive deeper into this session?</h4>
+              <a href="https://tubevibe.app/chat?transcript={{transcript_id}}" style="background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); background-color: #1e40af; color: #ffffff; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block;">
+                Ask Questions About This Session
+              </a>
+              <p style="margin-top: 15px; color: #374151; font-size: 14px; font-style: italic; line-height: 1.6;">
+                Try our new AI-powered Q&A tool to explore insights, clarify strategies, and get personalized answers!
+              </p>
+            </td>
+          </tr>
+        </table>
+        {{/transcript_id}}
+        
+        <!-- Action Items -->
+        {{#action_items}}
+        <h3 style="color: #1e40af; font-size: 16px; margin: 20px 0 12px 0; font-weight: 600;">Action Items</h3>
+        <ul style="margin: 0 0 20px 20px; padding: 0;">
+          {{#action_items}}
+          <li style="margin: 6px 0; line-height: 1.5;">{{.}}</li>
+          {{/action_items}}
+        </ul>
+        {{/action_items}}
+        
+        <!-- Trades Table -->
+        {{#trades}}
+        <h3 style="color: #1e40af; font-size: 16px; margin: 20px 0 12px 0; font-weight: 600;">Trades Discussed</h3>
+        <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse: collapse; margin: 12px 0; font-size: 13px;">
+          <thead>
+            <tr>
+              <th style="text-align: left; border-bottom: 1px solid #e5e7eb; background-color: #f3f4f6; font-weight: 600;">Ticker</th>
+              <th style="text-align: left; border-bottom: 1px solid #e5e7eb; background-color: #f3f4f6; font-weight: 600;">Direction</th>
+              <th style="text-align: left; border-bottom: 1px solid #e5e7eb; background-color: #f3f4f6; font-weight: 600;">Entry</th>
+              <th style="text-align: left; border-bottom: 1px solid #e5e7eb; background-color: #f3f4f6; font-weight: 600;">Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#trades}}
+            <tr>
+              <td style="border-bottom: 1px solid #e5e7eb;">{{ticker}}</td>
+              <td style="border-bottom: 1px solid #e5e7eb;">{{direction}}</td>
+              <td style="border-bottom: 1px solid #e5e7eb;">{{entry_price}}</td>
+              <td style="border-bottom: 1px solid #e5e7eb;">{{notes}}</td>
+            </tr>
+            {{/trades}}
+          </tbody>
+        </table>
+        {{/trades}}
+        
+      </td>
+    </tr>
+    
+    <!-- Footer -->
+    <tr>
+      <td style="background-color: #fafafa; padding: 15px 25px; font-size: 12px; color: #6b7280; text-align: center; border-top: 1px solid #e5e7eb;">
+        <p style="margin: 0;">Generated by TubeVibe Transcription and Analysis System on {{session_date}}</p>
+      </td>
+    </tr>
+    
+  </table>
+  
+</body>
+</html>

@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "bpt"
+version = "0.1.0"
+description = "Big Picture Trading Session Companion"
+authors = ["Your Name <you@example.com>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.68.0"
+langchain = "*"
+openai = "*"
+supabase = { git = "https://github.com/supabase-community/supabase-py.git" }
+slack-bolt = "*"
+jinja2 = "*"
+pytest = "*"
+uvicorn = "*"
+redis = "^4.5.0"
+celery = "^5.3.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api" 

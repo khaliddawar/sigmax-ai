@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(rm:*)",
+      "Bash(dir tests)",
+      "Bash(ls:*)",
+      "Bash(node:*)",
+      "Bash(dir:*)",
+      "Bash(powershell:*)",
+      "Bash(du:*)",
+      "Bash(cmd /c:*)",
+      "Bash(del \"C:\\Users\\KhalidNoor\\Documents\\GitHub\\Simply\\extension\\simply\\find_large_files.ps1\")",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(del \"C:\\Users\\KhalidNoor\\Documents\\GitHub\\Simply\\extension\\simply\\check_size.ps1\")",
+      "Bash(test:*)",
+      "Bash(cp:*)",
+      "Bash(tar:*)",
+      "Bash(tail:*)",
+      "Bash(head:*)",
+      "Bash(del /f \"C:\\Users\\KhalidNoor\\Documents\\GitHub\\Simply\\extension\\simply\\nul\")",
+      "Bash(python:*)",
+      "Bash(/dev/null)",
+      "Bash(true)"
+    ],
+    "deny": []
+  }
+}

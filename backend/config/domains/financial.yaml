@@ -1,0 +1,229 @@
+domain_name: financial
+description: "Financial trading and market analysis domain configuration"
+
+# Entity types for general categorization
+entity_types:
+  - market_index
+  - commodity  
+  - currency
+  - trade_idea
+  - economic_indicator
+  - geopolitical_event
+
+# Domain-specific terminology organized by financial instruments
+financial_instruments:
+  indices:
+    - "S&P 500"
+    - "SPX"
+    - "S&P"
+    - "sp500"
+    - "Nasdaq"
+    - "NASDAQ"
+    - "QQQ" 
+    - "Russell"
+    - "IWM"
+    - "Dow Jones"
+    - "DJIA"
+    - "VIX"
+    - "market"
+    - "index"
+    - "equity"
+    - "stocks"
+    - "Bitcoin"
+    - "BTC"
+    - "crypto"
+    - "cryptocurrency"
+    - "TLT"
+    - "bonds"
+    - "treasury"
+    - "yield"
+    - "10-year"
+    - "30-year"
+    
+  commodities:
+    - "gold"
+    - "silver"
+    - "oil"
+    - "WTI"
+    - "Brent"
+    - "crude"
+    - "natural gas"
+    - "copper"
+    - "platinum"
+    - "palladium"
+    - "uranium"
+    - "wheat"
+    - "corn"
+    - "soybeans"
+    - "coffee"
+    - "sugar"
+    - "cotton"
+    - "lumber"
+    - "steel"
+    
+  currencies:
+    - "dollar"
+    - "USD"
+    - "DXY"
+    - "dollar index"
+    - "euro"
+    - "EUR"
+    - "yen"
+    - "JPY"
+    - "pound"
+    - "GBP"
+    - "CAD"
+    - "AUD"
+    - "CHF"
+    - "currency"
+    - "forex"
+    - "FX"
+
+# Sentiment indicators for trading categorization
+sentiment_indicators:
+  bullish:
+    signals:
+      - "bullish"
+      - "buy"
+      - "long"
+      - "call"
+      - "upward"
+      - "breakout"
+      - "resistance break"
+      - "bounce"
+      - "rally"
+      - "pump"
+      - "moon"
+      - "bull run"
+      - "accumulation"
+    
+  bearish:
+    signals:
+      - "bearish"
+      - "sell"
+      - "short"
+      - "put"
+      - "downward"
+      - "breakdown"
+      - "support break"
+      - "dump"
+      - "crash"
+      - "correction"
+      - "pullback"
+      - "retracement"
+      - "distribution"
+    
+  trading_actions:
+    entries:
+      - "entry"
+      - "enter"
+      - "buy at"
+      - "sell at"
+      - "position"
+      - "trade"
+      - "idea"
+      - "setup"
+      - "signal"
+    
+    targets:
+      - "target"
+      - "take profit"
+      - "TP"
+      - "price target"
+      - "objective"
+      - "goal"
+    
+    stops:
+      - "stop loss"
+      - "SL"
+      - "stop"
+      - "risk"
+      - "cut loss"
+    
+    levels:
+      - "support"
+      - "resistance"
+      - "level"
+      - "fibonacci"
+      - "fib"
+      - "moving average"
+      - "MA"
+      - "EMA"
+      - "pivot"
+      - "key level"
+
+# Topic classification rules
+topic_classification:
+  boundary_indicators:
+    - "Q&A"
+    - "questions"
+    - "Q and A" 
+    - "question"
+    - "answer"
+    - "discussion"
+    - "Patrick"
+    - "Mass"
+    - "Missile"
+    - "host"
+    - "guest"
+    - "participant"
+    - "comment"
+    - "chat"
+    
+  market_events:
+    - "earnings"
+    - "Fed"
+    - "Federal Reserve"
+    - "FOMC"
+    - "inflation"
+    - "CPI"
+    - "PPI"
+    - "jobs report"
+    - "NFP"
+    - "unemployment"
+    - "GDP"
+    - "PMI"
+    - "retail sales"
+    - "ADP"
+    - "JOLTS"
+    
+  geopolitical:
+    - "China"
+    - "Russia"
+    - "Ukraine"
+    - "geopolitical"
+    - "tension"
+    - "war"
+    - "conflict"
+    - "sanctions"
+    - "trade war"
+    - "election"
+    - "politics"
+    
+  calendar_events:
+    - "date"
+    - "deadline"
+    - "meeting"
+    - "event"
+    - "announcement"
+    - "release"
+    - "schedule"
+    - "upcoming"
+    - "tomorrow"
+    - "next week"
+    - "this week"
+
+# Chunking parameters for financial content
+chunking:
+  paragraph_split: true
+  max_chunk_size: 4000
+  overlap: 100
+  preserve_sentences: true
+
+# Validation rules
+validation:
+  required_sections:
+    - "indices"
+    - "trading"
+  min_content_length: 50
+  max_empty_buckets: 1 

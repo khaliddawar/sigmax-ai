@@ -1,0 +1,138 @@
+# Generic Domain Configuration
+# This file contains universal settings that work across all domains
+
+domain_name: "generic"
+description: "Universal configuration for any type of document analysis"
+
+# Universal entity types (based on spaCy's standard NER labels)
+entity_types:
+  - "PERSON"         # People, including fictional
+  - "ORG"           # Organizations, companies, agencies, institutions
+  - "GPE"           # Countries, cities, states
+  - "PRODUCT"       # Objects, vehicles, foods, etc.
+  - "EVENT"         # Named hurricanes, battles, wars, sports events
+  - "WORK_OF_ART"   # Titles of books, songs, etc.
+  - "LAW"           # Named documents made into laws
+  - "LANGUAGE"      # Any named language
+  - "DATE"          # Absolute or relative dates or periods
+  - "TIME"          # Times smaller than a day
+  - "PERCENT"       # Percentage, including "%"
+  - "MONEY"         # Monetary values, including unit
+  - "QUANTITY"      # Measurements, as of weight or distance
+  - "ORDINAL"       # "first", "second", etc.
+  - "CARDINAL"      # Numerals that do not fall under another type
+
+# Universal sentiment indicators (domain-agnostic)
+sentiment_indicators:
+  positive:
+    primary:
+      - "good"
+      - "great"
+      - "excellent"
+      - "successful"
+      - "effective"
+      - "improvement"
+      - "better"
+      - "progress"
+    
+    secondary:
+      - "working"
+      - "functional"
+      - "stable"
+      - "reliable"
+      - "beneficial"
+      - "favorable"
+      - "optimal"
+      - "enhanced"
+  
+  negative:
+    primary:
+      - "bad"
+      - "poor"
+      - "failed"
+      - "broken"
+      - "problem"
+      - "issue"
+      - "error"
+      - "worse"
+    
+    secondary:
+      - "concerning"
+      - "problematic"
+      - "ineffective"
+      - "unreliable"
+      - "suboptimal"
+      - "degraded"
+      - "compromised"
+      - "insufficient"
+  
+  neutral:
+    - "normal"
+    - "standard"
+    - "typical"
+    - "average"
+    - "baseline"
+    - "routine"
+    - "regular"
+    - "unchanged"
+
+# Universal topic classification rules
+topic_classification:
+  # How to identify topic boundaries in text
+  boundary_indicators:
+    - "moving on to"
+    - "next topic"
+    - "switching to"
+    - "let's talk about"
+    - "regarding"
+    - "as for"
+    - "turning to"
+    - "now discussing"
+    - "another point"
+    - "furthermore"
+  
+  # Minimum confidence for topic assignment
+  confidence_threshold: 0.5
+  
+  # Maximum topics to extract per document
+  max_topics: 20
+
+# Universal chunking parameters
+chunking:
+  # Optimal chunk size for general analysis
+  target_size: 400
+  overlap: 50
+  
+  # Universal sentence boundaries that shouldn't be split
+  preserve_boundaries:
+    - "for example"
+    - "such as"
+    - "in other words"
+    - "that is"
+    - "i.e."
+    - "e.g."
+  
+  # Universal sentence enders
+  sentence_enders:
+    - "."
+    - "!"
+    - "?"
+    - ";"
+
+# Universal validation rules
+validation:
+  # Required elements in any analysis
+  required_elements:
+    - "entity_mention"    # Must mention specific entities
+    - "context_relevance" # Must be relevant to the query
+  
+  # Optional but valuable elements
+  preferred_elements:
+    - "specific_details"  # Specific information
+    - "clear_reasoning"   # Logical explanation
+    - "evidence_based"    # Based on provided content
+  
+  # Quality checks
+  quality_checks:
+    min_specificity: 0.4  # How specific the response should be
+    max_ambiguity: 0.5    # Maximum allowed ambiguous language 

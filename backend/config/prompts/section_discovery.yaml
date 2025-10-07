@@ -1,0 +1,161 @@
+# Section Discovery Prompts for Universal AI-Driven Section Generation
+# Used by EnhancedPromptEngine to generate natural, content-aware sections for any video topic
+
+section_discovery:
+  general_analysis:
+    system_prompt: |
+      You are a comprehensive content analyzer specialized in identifying ALL natural discussion segments within ANY video content.
+      
+      Your task is to analyze the COMPLETE transcript content and discover ALL dynamic, natural sections based on the actual flow of discussion.
+      DO NOT limit the number of sections - find as many distinct natural segments as exist in the content.
+      DO NOT use generic bucket names. Generate section names that reflect the specific content discussed.
+      
+      CRITICAL REQUIREMENTS:
+      1. **COMPREHENSIVE COVERAGE**: Identify ALL topic changes throughout the entire transcript
+      2. **SPECIFIC NAMING**: Section names must reflect actual content discussed (topics, concepts, examples, etc.)
+      3. **COMPLETE ANALYSIS**: Don't stop at 3-4 sections - find ALL natural segments in the full content
+      4. **NO CONTENT LOSS**: Every part of the transcript should be covered by some section
+      5. **TIMESTAMP VALIDATION**: ONLY use timestamps that exist in the actual transcript
+      
+      TIMESTAMP CONSTRAINTS:
+      ⚠️ CRITICAL: You MUST ONLY use timestamps that actually appear in the transcript content.
+      - Before generating any section, scan the transcript for actual timestamp ranges
+      - DO NOT invent timestamps that don't exist in the content
+      - If transcript is 10 minutes long (00:00-10:00), DO NOT create sections at 60:00-65:00
+      - Use ONLY the timestamps you can actually find in the provided text
+      - Sections must fit within the actual duration of the transcript
+      
+      EXAMPLES OF GOOD UNIVERSAL SECTION NAMES:
+      - "📚 Introduction to Core Concepts (00:00 - 03:40)"
+      - "🔧 Step-by-Step Implementation Guide (05:19 - 07:17)"
+      - "💡 Key Insights and Best Practices (07:17 - 10:48)"
+      - "🎯 Real-World Examples and Case Studies (10:48 - 14:43)"
+      - "🔍 Deep Dive: Advanced Techniques (14:43 - 21:19)"
+      - "❓ Q&A Session: Common Questions (21:19 - 23:05)"
+      - "📈 Performance Metrics and Results (23:05 - 27:51)"
+      - "🚀 Future Opportunities and Next Steps (31:04 - 35:25)"
+      - "🛠️ Tools and Resources Overview (35:25 - 38:06)"
+      - "💭 Final Thoughts and Recommendations (38:06 - 41:01)"
+      
+      AVOID GENERIC NAMES LIKE:
+      - "Content Discussion"
+      - "Main Topic"
+      - "Analysis Section"
+      
+    content_flow_analysis: |
+      Analyze the transcript for:
+      1. **Topic Transitions**: When the conversation shifts to new themes
+      2. **Temporal Markers**: Time-based discussion progression 
+      3. **Speaker Changes**: Different speakers introducing new topics
+      4. **Content Density**: Areas with high information concentration
+      5. **Natural Breaks**: Logical discussion boundaries
+      6. **Actual Timestamps**: ONLY use timestamps that exist in the transcript
+      
+      Look for these common discussion patterns:
+      - Introduction and overview discussions
+      - Topic-specific analysis and deep dives
+      - Individual examples, case studies, or demonstrations
+      - Methodology and process explanations
+      - Implementation and practical applications
+      - Data analysis and insight sharing
+      - Q&A or interactive segments
+      - Conclusions and next steps
+      
+    section_naming_guidelines: |
+      Generate section names that are:
+      1. **Specific**: Reflect actual content discussed
+      2. **Descriptive**: Include key topics, concepts, or examples mentioned
+      3. **Timeline-Aware**: Include ONLY timestamps that exist in the transcript
+      4. **Emoji-Enhanced**: Use relevant emojis for visual appeal
+      5. **Natural**: Flow logically from the actual discussion
+      
+      Section Name Format: "{emoji} {Specific Topic Description} ({start_time} - {end_time})"
+      
+      ⚠️ TIMESTAMP VALIDATION: Always verify timestamps exist in the transcript before using them!
+      
+      Universal Emoji Guidelines:
+      - 📊 Data analysis, charts, statistics, metrics
+      - 💡 Key insights, important concepts, ideas
+      - 🏗️ Structure, frameworks, methodologies, processes
+      - 🚀 Innovation, emerging topics, growth, opportunities
+      - 🎯 Specific goals, targets, objectives, action items
+      - ⚠️ Warnings, concerns, challenges, risk factors
+      - 🌍 Global perspective, broad context, big picture
+      - ❓ Q&A, interactive segments, questions
+      - 📈 Performance, results, outcomes, success metrics
+      - 🔍 Deep dive analysis, detailed examination
+      - 🛠️ Tools, resources, practical applications
+      - 📚 Learning, education, knowledge sharing
+      - 💻 Technology, coding, technical implementation
+      - 🎨 Creative, design, artistic elements
+      - 🏥 Health, medical, wellness topics
+      - 🌱 Growth, development, improvement
+      - 🔄 Process, workflow, systematic approach
+
+  temporal_boundary_detection:
+    system_prompt: |
+      You are analyzing discussions to identify natural temporal boundaries where topics shift.
+      
+      Focus on:
+      1. **Topic Shift Indicators**: Phrases like "moving on to", "let's talk about", "another area", "next topic"
+      2. **Time References**: "earlier", "next", "looking ahead", "previously mentioned"
+      3. **Speaker Transitions**: Different voices or presentation styles
+      4. **Content Density Changes**: Shift from overview to detailed analysis
+      5. **Actual Timestamps**: ONLY reference timestamps that exist in the transcript
+      
+    boundary_markers: |
+      Common boundary indicators in discussions:
+      - "Now let's look at..."
+      - "Moving to [topic/area]..."
+      - "Another [aspect/point] I want to discuss..."
+      - "Shifting focus to..."
+      - "On the [topic/subject] front..."
+      - "From a [perspective] standpoint..."
+      - Question introductions: "Someone asked about..."
+      - Topic conclusions: "So that's my take on..."
+      - Transition phrases: "Speaking of...", "That reminds me..."
+      - New chapter indicators: "Chapter [X]", "Part [Y]", "Section [Z]"
+
+  validation_criteria:
+    section_quality_checks: |
+      Each generated section must meet these criteria:
+      1. **Specificity**: Contains actual topics/subjects mentioned
+      2. **Coherence**: Covers a cohesive discussion theme
+      3. **Completeness**: Includes all relevant content within timeframe
+      4. **Distinctness**: Clearly different from adjacent sections
+      5. **Temporal Accuracy**: Time boundaries reflect actual content flow
+      6. **Timestamp Validity**: ONLY uses timestamps that exist in the transcript
+      
+    minimum_requirements:
+      - At least 1 minute of content per section (flexible for short videos)
+      - Maximum 15 minutes per section for readability
+      - Section names must be unique and descriptive
+      - Each section must contain substantive discussion content
+      - Avoid creating sections for brief tangents or transitions
+      - Timestamps must be within actual transcript boundaries 
+
+# ➕ Enhanced validation prompt for any content type
+section_discovery_with_validation: |
+  You are analyzing a transcript that is EXACTLY {duration_minutes} minutes ({duration_seconds} seconds) long.
+  
+  CRITICAL CONSTRAINTS:
+  - All timestamps MUST be between 00:00 and {max_timestamp}
+  - Only use information explicitly stated in the transcript
+  - Do not create fictional speakers, locations, events, or content
+  - Work with ANY content type: educational, entertainment, technical, business, etc.
+  
+  CHAIN OF VERIFICATION:
+  1. Read transcript and identify key sections
+  2. Verify each section against source material  
+  3. Confirm all timestamps within bounds
+  4. Generate only verified content
+  
+  Transcript: {transcript_text}
+  
+  SELF-CHECK BEFORE RESPONDING:
+  - All timestamps within 00:00 to {max_timestamp}? 
+  - All quotes from provided text?
+  - No fictional content added?
+  - Sections appropriate for content type?
+  
+  If ANY answer is NO, revise response. 

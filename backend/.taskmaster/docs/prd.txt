@@ -1,0 +1,152 @@
+# Simply Chrome Extension - Product Requirements Document
+
+## Project Overview
+**Product Name:** Simply Chrome Extension
+**Objective:** Chrome extension that transforms any YouTube video into: ① live transcript ② one-click summary ③ optional formatted email ④ RAG chat ("Talk to the video")
+
+## Existing System Integration
+**Backend:** Fully-tested FastAPI pipeline that already ingests Fireflies webhook transcripts → chunk → embed → store in Supabase → email summary
+**Constraint:** Reuse existing backend unchanged. NO changes to core Fireflies pipeline tables except specified additions.
+**DO NOT CHANGE:** Chunking logic, embedding model, RAG query service, prompt files, existing summary engine, Supabase schema for transcripts, semantic_chunks, subscribers.
+
+## Technical Architecture
+
+### Data Flow
+```
+Chrome Extension → POST /api/yt_ingest → Ingest-API (FastAPI) → Redis Stream → Celery Worker Pool → Supabase + Postmark Email
+Chrome Extension → JWT → /existing RAG /qa/query/
+```
+
+### Technology Stack (Mandatory - No Substitutions)
+- **Chrome Extension:** Manifest V3, TypeScript, React 18, Tailwind CSS, Zustand, Plasmo CLI
+- **Ingest API:** Python 3.11, FastAPI, uvicorn, redis==5.*, supabase==2.*
+- **Queue:** Redis 7 Streams (Render Redis Add-on)
+- **Worker:** Celery, Python 3.11, existing app/services/
+- **Database:** Postgres 15 + pgvector (Supabase)
+- **Email:** Postmark API
+- **Hosting:** Render (Web Service + Background Worker)
+
+## Core Features
+
+### 1. Chrome Extension Components
+**manifest.json:** Declares permissions, icons, entry points
+**content.tsx:** 
+- Reads captions URL from ytInitialPlayerResponse JSON
+- Fetches caption XML/JSON from YouTube
+- Sends {videoId, lang, transcript, title} to service-worker
+
+**service-worker.ts:**
+- Receives transcript message
+- Computes token_est = transcript.length ÷ 4
+- Calls /api/yt_ingest with Supabase JWT
+- Stores summary & transcript_hash in chrome.storage.local
+- Streams progress events back to UI
+
+**popup.tsx:** Tabbed UI (Transcript | Summary) with buttons: Copy, Email, Ask Video
+**sidepanel.tsx:** Chat UI calling existing /qa/query/ RAG endpoint
+**State Management:** Zustand-persist for supabaseSession, plan, usage
+
+### 2. YouTube Caption Extraction
+**Primary Method:** Extract ytInitialPlayerResponse from window object
+**Fallback:** Parse from script tags using regex
+**Multi-language Support:** List all captionTracks, allow language switching
+**Format Handling:** Support both XML-TTML and JSON3 formats
+**Error Handling:** Graceful degradation for private/restricted videos
+
+### 3. Backend API Extensions
+**New Endpoint:** POST /api/yt_ingest
+- Validates JSON payload
+- Estimates tokens
+- Saves transcript to S3-sized flat-file if within plan limits
+- Pushes job to Redis stream
+- Returns 202 {"job_id": ...}
+
+**Queue Status:** GET /queue/position/{job_id} - returns position & ETA
+
+### 4. Database Schema Changes (Minimal)
+```sql
+ALTER TABLE transcripts ADD COLUMN IF NOT EXISTS source text DEFAULT 'fireflies';
+ALTER TABLE transcripts ADD COLUMN IF NOT EXISTS title text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS plan_limits jsonb;
+```
+
+### 5. Worker Processing Pipeline
+**Celery Task:** process_youtube_ingest(payload)
+1. Recompute token_est; call SQL can_consume(user, 'tokens', token_est)
+2. Generate summary via existing enhanced-summary-service-v2 (gpt-4o-mini)
+3. Call existing ingestion_service.py for chunking + embedding
+4. Insert/merge transcript row
+5. Send email if payload.email == true
+6. Insert usage_ledger rows for tokens & chat
+
+### 6. Fair-Use & Quota Management
+**Token Estimation:** 
+- Edge: len(transcript) / 3.8 * 1.05 (5% safety margin)
+- Worker: Precise tiktoken counting for gpt-4o-mini + text-embedding-3-small
+
+**Limits:**
+- Free: 2,000 tokens/day, 40,000/month
+- Pro: 50,000/day, 700,000/month
+
+**Enforcement:** SQL function can_consume() with RLS policies
+
+### 7. Email Integration
+**Service:** Postmark API
+**Template:** templates/summary_email.html
+**Subject:** Video title + summary
+**Webhook:** /postmark/webhook for bounce handling
+
+## User Experience
+
+### Extension UI
+**Popup Tabs:**
+- Transcript: Shows extracted captions with language selector
+- Summary: AI-generated summary with Copy/Email buttons
+
+**Sidepanel:** Chat interface for RAG queries about video content
+
+**Visual Indicators:**
+- Auto-generated vs manual captions badge
+- Processing status with queue position
+- Error states for restricted videos
+
+### Error Handling
+**No Captions:** Grey banner "⚠ No captions available", disable buttons
+**Private Videos:** "Video restricted—cannot fetch captions"
+**Format Changes:** "Caption format changed—please update extension"
+**Quota Exceeded:** Clear messaging with upgrade options
+
+## Security Requirements
+- JWT required on all protected routes
+- CORS: chrome-extension://<EXT_ID> and dashboard domain only
+- Supabase Row-Level Security enforced
+- Content Security Policy in extension
+- No API keys stored in extension (worker-side only)
+
+## Implementation Order (Mandatory Sequence)
+1. Extension skeleton (plasmo init, manifest stubs)
+2. Ingest API route & Redis connection
+3. Redis Stream + Celery wiring, import existing core services
+4. Supabase column patch
+5. Postmark switch (replace Gmail calls)
+6. Fair-use SQL & ledger writing
+7. Extension UI finish + state store
+8. Playwright regression tests
+9. Render deploy for web + worker, enable autoscaler
+10. Chrome Web Store submission
+
+## Success Criteria
+- Process 5,000 YouTube videos/day initially
+- <3 minute queue drain time during peak usage
+- Support all YouTube caption languages
+- 99.9% uptime for existing Fireflies pipeline (unchanged)
+- Seamless integration with existing RAG chat system
+- Professional email summaries matching existing quality
+
+## Constraints & Non-Negotiables
+- NO changes to existing chunking logic, embedding model, or RAG service
+- NO new third-party services beyond specified stack
+- NO modifications to core Fireflies pipeline tables
+- Exact tech stack as specified (no substitutions)
+- Must follow implementation order precisely
+- All existing functionality must remain unaffected 
